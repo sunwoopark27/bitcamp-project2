@@ -3,6 +3,7 @@ package com.eomcs.pms;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import com.eomcs.util.Prompt;
 
 public class ClientApp {
@@ -26,10 +27,35 @@ public class ClientApp {
       while(true) {
         String message = Prompt.inputString("명령> ");
         out.writeUTF(message);
+
+        out.writeInt(1);
+
+        out.writeUTF("aaaa");
+        out.writeUTF("bbbb");
+        out.writeUTF("cccc");
+
         out.flush();
 
         String response = in.readUTF();
-        System.out.println(response);
+        int length = in.readInt();
+
+        ArrayList<String> data = null;
+        if(length > 0) {
+          data = new ArrayList<>();
+          for (int i = 0; i < length; i++) {
+            data.add(in.readUTF());
+          }
+        }
+
+        System.out.println("----------------------------");
+        System.out.printf("작업 결과: %s\n", response);
+        System.out.printf("데이터 개수: %d\n", length);
+        if (data != null) {
+          System.out.println("데이터:");
+          for (String str : data) {
+            System.out.println(str);
+          }
+        }
 
         if(message.equals("quit")) {
           break;
