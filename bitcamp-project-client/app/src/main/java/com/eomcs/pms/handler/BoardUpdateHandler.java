@@ -2,7 +2,6 @@ package com.eomcs.pms.handler;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import com.eomcs.pms.domain.Board;
 import com.eomcs.util.Prompt;
 
 public class BoardUpdateHandler implements Command {
@@ -12,18 +11,38 @@ public class BoardUpdateHandler implements Command {
     try {
       System.out.println("[게시글 변경]");
 
-      Board b = new Board();
+      int no = Prompt.inputInt("번호? ");
 
-      b.setNo(Prompt.inputInt("번호? "));
-      b.setTitle(Prompt.inputString("제목? "));
-      b.setContent(Prompt.inputString("내용? "));
-
-      out.writeUTF("board/update");
+      out.writeUTF("board/select");
       out.writeInt(1);
-      out.writeUTF(String.format("%d,%s,%s", b.getNo(), b.getTitle(), b.getContent()));
+      out.writeUTF(Integer.toString(no));
       out.flush();
 
       String status = in.readUTF();
+      in.readInt();
+
+      if(status.equals("error")) {
+        System.out.println(in.readUTF());
+        return;
+      }
+
+      String[] fields = in.readUTF().split(",");
+
+      String title = Prompt.inputString(String.format("제목(%s)? ", fields[1]));
+      String content = Prompt.inputString(String.format("내용(%s)? ", fields[2]));
+
+      String input = Prompt.inputString("정말 변경하시겠습니까?(y/N) ");
+      if (!input.equalsIgnoreCase("Y")) {
+        System.out.println("게시글 변경을 취소하였습니다.");
+        return;
+      }
+
+      out.writeUTF("board/update");
+      out.writeInt(1);
+      out.writeUTF(String.format("%d,%s,%s", no, title, content));
+      out.flush();
+
+      status = in.readUTF();
       in.readInt();
 
       if (status.equals("error")) {

@@ -90,9 +90,9 @@ public class BoardTable implements DataTable {
         //  그냥 그 객체의 값을 변경하면 된다.
         board.setTitle(fields[1]);
         board.setContent(fields[2]);
+
         JsonFileHandler.saveObjects(jsonFile, list);
         break;
-
       case "board/delete":
         no = Integer.parseInt(request.getData().get(0));
         board = getBoard(no);
