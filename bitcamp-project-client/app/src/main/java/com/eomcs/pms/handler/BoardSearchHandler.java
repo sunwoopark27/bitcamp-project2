@@ -1,18 +1,15 @@
 package com.eomcs.pms.handler;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.ArrayList;
-import java.util.List;
 import com.eomcs.pms.domain.Board;
 import com.eomcs.util.Prompt;
 
-public class BoardSearchHandler extends AbstractBoardHandler {
-
-  public BoardSearchHandler(List<Board> boardList) {
-    super(boardList);
-  }
+public class BoardSearchHandler implements Command {
 
   @Override
-  public void service() {
+  public void service(DataInputStream in, DataOutputStream out) {
     String keyword = Prompt.inputString("검색어? ");
 
     if (keyword.length() == 0) {

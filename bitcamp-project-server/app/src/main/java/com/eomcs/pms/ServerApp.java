@@ -79,7 +79,7 @@ public class ServerApp {
             sendResponse(
                 out,
                 "error",
-                e.getMessage());
+                e.getMessage() != null ? e.getMessage() : e.getClass().getName());
           }
         } else {
           sendResponse(out, "error", "해당 요청을 처리할 수 없습니다!");
