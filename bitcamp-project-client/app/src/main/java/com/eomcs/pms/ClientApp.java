@@ -66,9 +66,17 @@ public class ClientApp {
               break;
             case "quit":
             case "exit":
+              // 서버에게 종료한다고 메세지를 보낸다.
               out.writeUTF("quit");
               out.writeInt(0);
               out.flush();
+
+              // 서버가 보낸 응답을 읽는다.
+              // - 서버가 보낸 응답을 읽지 않으면  프로토콜 위반이다.
+              // - 서버가 보낸 데이터를 사용하지 않더라도 프로토콜 규칙에 따라 읽어야 한다.
+              in.readUTF();
+              in.readInt();
+
               System.out.println("안녕!");
               return;
             default:
