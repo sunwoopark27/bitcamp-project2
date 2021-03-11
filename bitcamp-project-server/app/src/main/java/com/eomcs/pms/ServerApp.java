@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Set;
 import com.eomcs.pms.table.BoardTable;
 import com.eomcs.pms.table.DataTable;
+import com.eomcs.pms.table.MemberTable;
+import com.eomcs.pms.table.ProjectTable;
+import com.eomcs.pms.table.TaskTable;
 import com.eomcs.util.Request;
 import com.eomcs.util.Response;
 
@@ -32,14 +35,17 @@ public class ServerApp {
 
     // 요청을 처리할 테이블 객체를 준비한다.
     tableMap.put("board/", new BoardTable());
+    tableMap.put("member/", new MemberTable());
+    tableMap.put("project/", new ProjectTable());
+    tableMap.put("task/", new TaskTable());
 
-    // 클라이언트 연결을 기다는 서버 소켓 생성
+    // 클라이언트 연결을 기다리는 서버 소켓 생성
     try (ServerSocket serverSocket = new ServerSocket(this.port)) {
 
       System.out.println("서버 실행!");
-
-      processRequest(serverSocket.accept());
-
+      while(true) {
+        processRequest(serverSocket.accept());
+      }
     } catch (Exception e) {
       System.out.println("서버 실행 중 오류 발생!");
       e.printStackTrace();
