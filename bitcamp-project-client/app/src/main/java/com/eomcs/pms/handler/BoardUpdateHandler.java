@@ -13,15 +13,17 @@ public class BoardUpdateHandler implements Command {
 
       int no = Prompt.inputInt("번호? ");
 
+      // 서버에 지정한 번호의 게시글을 요청한다.
       out.writeUTF("board/select");
       out.writeInt(1);
       out.writeUTF(Integer.toString(no));
       out.flush();
 
+      // 서버의 응답을 받는다.
       String status = in.readUTF();
       in.readInt();
 
-      if(status.equals("error")) {
+      if (status.equals("error")) {
         System.out.println(in.readUTF());
         return;
       }
@@ -37,11 +39,13 @@ public class BoardUpdateHandler implements Command {
         return;
       }
 
+      // 서버에 데이터 변경을 요청한다.
       out.writeUTF("board/update");
       out.writeInt(1);
       out.writeUTF(String.format("%d,%s,%s", no, title, content));
       out.flush();
 
+      // 서버의 응답을 받는다.
       status = in.readUTF();
       in.readInt();
 
@@ -52,7 +56,7 @@ public class BoardUpdateHandler implements Command {
 
       System.out.println("게시글을 변경하였습니다.");
 
-    }catch(Exception e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
