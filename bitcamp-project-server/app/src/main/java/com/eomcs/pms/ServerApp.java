@@ -33,20 +33,6 @@ public class ServerApp {
 
   public void service() {
 
-    class StatementHandlerThread4 extends Thread {
-      Socket socket;
-
-      public StatementHandlerThread4(Socket socket) {
-        this.socket = socket;
-      }
-
-      @Override
-      public void run() {
-        processRequest(this.socket);
-      }
-
-    }
-
     // 요청을 처리할 테이블 객체를 준비한다.
     tableMap.put("board/", new BoardTable());
     tableMap.put("member/", new MemberTable());
@@ -60,7 +46,13 @@ public class ServerApp {
 
       while (true) {
         Socket socket = serverSocket.accept();
-        new StatementHandlerThread4(socket).start();
+
+        new Thread() {
+          @Override
+          public void run() {
+            processRequest(socket);
+          };
+        }.start();
       }
 
     } catch (Exception e) {
