@@ -13,7 +13,6 @@ public class BoardUpdateHandler implements Command {
 
     String[] fields = stmt.executeQuery("board/select", Integer.toString(no)).next().split(",");
 
-
     String title = Prompt.inputString(String.format("제목(%s)? ", fields[1]));
     String content = Prompt.inputString(String.format("내용(%s)? ", fields[2]));
 

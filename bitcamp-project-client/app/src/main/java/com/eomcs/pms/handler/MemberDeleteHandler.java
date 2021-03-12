@@ -22,8 +22,6 @@ public class MemberDeleteHandler implements Command {
     stmt.executeUpdate("member/delete", Integer.toString(no));
 
     System.out.println("회원을 삭제하였습니다.");
-
-
   }
 }
 

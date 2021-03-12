@@ -43,9 +43,11 @@ public class ServerApp {
     try (ServerSocket serverSocket = new ServerSocket(this.port)) {
 
       System.out.println("서버 실행!");
-      while(true) {
+
+      while (true) {
         processRequest(serverSocket.accept());
       }
+
     } catch (Exception e) {
       System.out.println("서버 실행 중 오류 발생!");
       e.printStackTrace();

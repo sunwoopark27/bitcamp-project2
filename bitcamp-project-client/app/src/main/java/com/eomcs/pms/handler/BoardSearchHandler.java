@@ -8,7 +8,6 @@ public class BoardSearchHandler implements Command {
 
   @Override
   public void service(Statement stmt) throws Exception {
-
     String keyword = Prompt.inputString("검색어? ");
 
     if (keyword.length() == 0) {
@@ -25,7 +24,6 @@ public class BoardSearchHandler implements Command {
 
     while (results.hasNext()) {
       String[] fields = results.next().split(",");
-
       System.out.printf("%s, %s, %s, %s, %s\n", 
           fields[0], 
           fields[1], 

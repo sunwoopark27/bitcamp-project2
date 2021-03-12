@@ -13,7 +13,6 @@ public class MemberListHandler implements Command {
 
     while (results.hasNext()) {
       String[] fields = results.next().split(",");
-
       System.out.printf("%s, %s, %s, %s, %s\n",
           fields[0], 
           fields[1], 

@@ -16,7 +16,7 @@ public class BoardAddHandler implements Command {
     b.setContent(Prompt.inputString("내용? "));
     b.setWriter(Prompt.inputString("작성자? "));
 
-    stmt.executeUpdate("board/insert",
+    stmt.executeUpdate("board/insert", 
         String.format("%s,%s,%s", b.getTitle(), b.getContent(), b.getWriter()));
 
     System.out.println("게시글을 등록하였습니다.");

@@ -9,7 +9,7 @@ public class BoardListHandler implements Command {
   public void service(Statement stmt) throws Exception {
     System.out.println("[게시글 목록]");
 
-    Iterator<String> results= stmt.executeQuery("board/selectall");
+    Iterator<String> results = stmt.executeQuery("board/selectall");
 
     while (results.hasNext()) {
       String[] fields = results.next().split(",");

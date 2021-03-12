@@ -17,7 +17,7 @@ public class MemberAddHandler implements Command {
     m.setPhoto(Prompt.inputString("사진? "));
     m.setTel(Prompt.inputString("전화? "));
 
-    stmt.executeQuery("member/insert",
+    stmt.executeUpdate("member/insert", 
         String.format("%s,%s,%s,%s,%s", 
             m.getName(), m.getEmail(), m.getPassword(), m.getPhoto(), m.getTel()));
 

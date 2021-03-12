@@ -5,8 +5,7 @@ import com.eomcs.util.Prompt;
 
 public class MemberValidator {
 
-  public static String inputMember(
-      String promptTitle, Statement stmt) throws Exception{
+  public static String inputMember(String promptTitle, Statement stmt) throws Exception{
 
     while (true) {
       String name = Prompt.inputString(promptTitle);
@@ -15,16 +14,14 @@ public class MemberValidator {
       } 
 
       try {
-        stmt.executeQuery("member/selectByName", name).next().split(",");
+        return stmt.executeQuery("member/selectByName", name).next().split(",")[1];
       } catch (Exception e) {
-        System.out.println("등록된 회원이 아닙니다.");        
+        System.out.println("등록된 회원이 아닙니다.");
       }
-
     }
   }
 
-  public static String inputMembers(
-      String promptTitle, Statement stmt) throws Exception{
+  public static String inputMembers(String promptTitle, Statement stmt) throws Exception{
     String members = "";
     while (true) {
       String name = inputMember(promptTitle, stmt);

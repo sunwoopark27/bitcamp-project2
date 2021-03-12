@@ -1,9 +1,10 @@
 package com.eomcs.pms.handler;
 
 import com.eomcs.driver.Statement;
-import com.eomcs.util.Prompt; 
+import com.eomcs.util.Prompt;
 
 public class MemberUpdateHandler implements Command {
+
   @Override
   public void service(Statement stmt) throws Exception {
     System.out.println("[회원 변경]");
@@ -23,10 +24,10 @@ public class MemberUpdateHandler implements Command {
       return;
     }
 
-    stmt.executeUpdate("member/update", String.format("%d,%s,%s,%s,%s", no, name, email, photo, tel));
+    stmt.executeUpdate("member/update", 
+        String.format("%d,%s,%s,%s,%s", no, name, email, photo, tel));
 
     System.out.println("회원을 변경하였습니다.");
-
   }
 }
 
