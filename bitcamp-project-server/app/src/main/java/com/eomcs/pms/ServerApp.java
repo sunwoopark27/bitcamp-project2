@@ -47,12 +47,7 @@ public class ServerApp {
       while (true) {
         Socket socket = serverSocket.accept();
 
-        new Thread() {
-          @Override
-          public void run() {
-            processRequest(socket);
-          };
-        }.start();
+        new Thread(() -> processRequest(socket)).start();
       }
 
     } catch (Exception e) {
