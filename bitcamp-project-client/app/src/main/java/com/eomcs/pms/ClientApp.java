@@ -3,6 +3,7 @@ package com.eomcs.pms;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import com.eomcs.util.Prompt;
 
 public class ClientApp {
   String serverAddress;
@@ -23,12 +24,20 @@ public class ClientApp {
         DataInputStream in = new DataInputStream(socket.getInputStream());
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());) {
 
-      out.writeUTF("hello");
-      out.flush();
+      while(true) {
+        String message = Prompt.inputString("명령> ");
 
-      String response = in.readUTF();
-      System.out.println(response);
+        out.writeUTF(message);
+        out.flush();
 
+        String response = in.readUTF();
+        System.out.println(response);
+
+        if(message.equals("quit")) {
+          break;
+        }
+      }
+      Prompt.close();
     }catch (Exception e) {
       System.out.println("서버와 통신하는 중 오류 발생!");
     }
