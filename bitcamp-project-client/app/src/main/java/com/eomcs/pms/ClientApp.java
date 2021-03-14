@@ -37,7 +37,9 @@ public class ClientApp {
           break;
         }
       }
+
       Prompt.close();
+
     }catch (Exception e) {
       System.out.println("서버와 통신하는 중 오류 발생!");
     }
