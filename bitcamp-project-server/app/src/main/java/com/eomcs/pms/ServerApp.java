@@ -5,11 +5,19 @@ import java.io.DataOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import com.eomcs.pms.table.BoardTable;
+import com.eomcs.pms.table.DataTable;
+import com.eomcs.util.Request;
+import com.eomcs.util.Response;
 
 // 데이터를 파일에 보관하고 꺼내는 일을 할 애플리케이션
 public class ServerApp {
 
   int port;
+  HashMap<String,DataTable> tableMap = new HashMap<>();
 
   public static void main(String[] args) {
     ServerApp app = new ServerApp(8888);
@@ -21,6 +29,9 @@ public class ServerApp {
   }
 
   private void service() {
+
+    // 요청을 처리할 테이블 객체를 준비한다.
+    tableMap.put("board/", new BoardTable());
 
     try (ServerSocket serverSocket = new ServerSocket(this.port)) {
       System.out.println("서버 실행!");
@@ -38,29 +49,18 @@ public class ServerApp {
         DataInputStream in = new DataInputStream(socket.getInputStream());){
 
       while (true) {
-        // 1) 명령어 문자열을 읽는다.
-        String request = in.readUTF();
+        Request request = receiveRequest(in);
+        log(request);
 
-        // 2) 클라이언트가 보낸 데이터의 개수를 읽는다.
-        int length = in.readInt();
-
-        // 3) 클라이언트가 보낸 데이터를 읽어서 List에 담는다
-        ArrayList<String> data = null;
-        if(length > 0) {
-          data = new ArrayList<>();
-          for (int i = 0; i < length; i++) {
-            data.add(in.readUTF());
-          }
+        if(request.equals("quit")) {
+          break;
         }
 
-        System.out.println("-------------------------------");
-        System.out.printf("명령 : %s\n", request);
-        System.out.printf("데이터 개수 : %d\n", length);
-        if(data != null) {
-          System.out.println("데이터 : ");
-          for(String str : data) {
-            System.out.println(str);
-          }
+        DataTable dataTable = findDataTable(request.getCommand());
+
+        if(dataTable != null) {
+          Response response = new Response();
+          dataTable.service(request, response);
         }
 
         // 1) 클라이언트에게 요청에 대한 작업 결과를 보낸다.
@@ -74,15 +74,58 @@ public class ServerApp {
 
         out.flush();
 
-        if(request.equals("quit")) {
-          break;
-        }
       }
     } catch (Exception e) {
       System.out.println("클라이언트의 요청을 처리하는 중 오류 발생!");
       e.printStackTrace();
     }
 
+  }
+
+  private DataTable findDataTable(String command) {
+    Set<String> keySet = tableMap.keySet();
+    for (String key : keySet) {
+      if(command.startsWith(key)) {
+        return tableMap.get(key);
+      }
+    }
+    return null;
+  }
+
+  private Request receiveRequest(DataInputStream in) throws Exception {
+
+    Request request = new Request();
+
+    // 1) 명령어 문자열을 읽는다.
+    request.setCommand(in.readUTF());
+
+    // 2) 클라이언트가 보낸 데이터의 개수를 읽는다.
+    int length = in.readInt();
+
+    // 3) 클라이언트가 보낸 데이터를 읽어서 List에 담는다
+    ArrayList<String> data = null;
+    if(length > 0) {
+      data = new ArrayList<>();
+      for (int i = 0; i < length; i++) {
+        data.add(in.readUTF());
+      }
+      request.setData(data);
+    }
+    return request;
+  }
+
+  private void log(Request request) {
+    System.out.println("-------------------------------");
+    System.out.printf("명령 : %s\n", request);
+
+    List<String> data = request.getData();
+    System.out.printf("데이터 개수 : %d\n", data == null ? 0 : data.size());
+    if(data != null) {
+      System.out.println("데이터 : ");
+      for(String str : data) {
+        System.out.println(str);
+      }
+    }
   }
 
 }
