@@ -5,8 +5,21 @@ import java.io.DataOutputStream;
 import java.net.Socket;
 
 public class ClientApp {
+  String serverAddress;
+  int port;
+
   public static void main(String[] args) {
-    try(Socket socket = new Socket("localhost", 8888);
+    ClientApp app = new ClientApp("localhost", 8888);
+    app.execute();
+  }
+
+  public ClientApp(String serverAddress, int port) {
+    this.serverAddress = serverAddress;
+    this.port = port;
+  }
+
+  public void execute() {
+    try(Socket socket = new Socket(this.serverAddress, this.port);
         DataInputStream in = new DataInputStream(socket.getInputStream());
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());) {
 
