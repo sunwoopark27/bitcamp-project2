@@ -2,7 +2,7 @@ package com.eomcs.pms.domain;
 
 import java.sql.Date;
 
-public class Board{
+public class Board {
   private int no;
   private String title;
   private String content;
