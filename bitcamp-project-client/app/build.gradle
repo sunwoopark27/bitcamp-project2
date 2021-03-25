@@ -21,8 +21,10 @@ repositories {
 }
 
 dependencies {
+    // MariaDB JDBC 드라이버
+    implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.2'
+    
     testImplementation 'junit:junit:4.13'
-
     implementation 'com.google.guava:guava:29.0-jre'
 }
 
