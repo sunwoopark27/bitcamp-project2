@@ -47,6 +47,7 @@ public class ProjectAddHandler implements Command {
       stmt.executeUpdate();
 
       System.out.println("프로젝트를 등록했습니다.");
+      System.out.println();
     }
   }
 }
