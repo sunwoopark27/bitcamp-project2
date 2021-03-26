@@ -14,14 +14,16 @@ public class MemberListHandler implements Command {
     try (Connection con = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
         PreparedStatement stmt = con.prepareStatement(
-            "select no,name,cdt from pms_member order by no desc");
+            "select no,name,email,photo,tel from pms_member order by name asc");
         ResultSet rs = stmt.executeQuery()) {
 
       while (rs.next()) {
-        System.out.printf("%s, %s, %s\n",
+        System.out.printf("%s, %s, %s, %s, %s\n",
             rs.getInt("no"),
             rs.getString("name"),
-            rs.getDate("cdt"));
+            rs.getString("email"),
+            rs.getString("photo"),
+            rs.getString("tel"));
       }
     }
   }
