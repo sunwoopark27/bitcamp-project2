@@ -14,7 +14,6 @@ public class Project {
 
   public Project() {}
 
-
   @Override
   public String toString() {
     return "Project [no=" + no + ", title=" + title + ", content=" + content + ", startDate="
@@ -62,5 +61,5 @@ public class Project {
   }
   public void setMembers(List<Member> members) {
     this.members = members;
-  }
+  }  
 }

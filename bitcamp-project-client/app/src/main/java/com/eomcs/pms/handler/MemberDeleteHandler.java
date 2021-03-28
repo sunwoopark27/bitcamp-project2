@@ -19,13 +19,12 @@ public class MemberDeleteHandler implements Command {
       return;
     }
 
-    try (Connection con = DriverManager.getConnection( //
+    try (Connection con = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
-        PreparedStatement stmt = con.prepareStatement( //
+        PreparedStatement stmt = con.prepareStatement(
             "delete from pms_member where no=?")) {
 
       stmt.setInt(1, no);
-
       if (stmt.executeUpdate() == 0) {
         System.out.println("해당 번호의 회원이 없습니다.");
       } else {

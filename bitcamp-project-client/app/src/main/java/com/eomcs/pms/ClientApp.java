@@ -111,7 +111,6 @@ public class ClientApp {
               break;
             case "quit":
             case "exit":
-
               System.out.println("안녕!");
               return;
             default:

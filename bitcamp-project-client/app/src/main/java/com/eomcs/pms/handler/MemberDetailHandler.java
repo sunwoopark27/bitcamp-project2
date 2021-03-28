@@ -14,7 +14,6 @@ public class MemberDetailHandler implements Command {
 
     int no = Prompt.inputInt("번호? ");
 
-
     try (Connection con = DriverManager.getConnection( //
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
         PreparedStatement stmt = con.prepareStatement( //
@@ -31,7 +30,7 @@ public class MemberDetailHandler implements Command {
         System.out.printf("이름: %s\n", rs.getString("name"));
         System.out.printf("이메일: %s\n", rs.getString("email"));
         System.out.printf("사진: %s\n", rs.getString("photo"));
-        System.out.printf("전화번호: %s\n", rs.getString("tel"));
+        System.out.printf("전화: %s\n", rs.getString("tel"));
         System.out.printf("가입일: %s\n", rs.getDate("cdt"));
       }
     }

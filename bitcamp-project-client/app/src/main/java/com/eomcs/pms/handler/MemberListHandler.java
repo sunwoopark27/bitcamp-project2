@@ -18,9 +18,9 @@ public class MemberListHandler implements Command {
         ResultSet rs = stmt.executeQuery()) {
 
       while (rs.next()) {
-        System.out.printf("%s, %s, %s, %s, %s\n",
-            rs.getInt("no"),
-            rs.getString("name"),
+        System.out.printf("%d, %s, %s, %s, %s\n", 
+            rs.getInt("no"), 
+            rs.getString("name"), 
             rs.getString("email"),
             rs.getString("photo"),
             rs.getString("tel"));

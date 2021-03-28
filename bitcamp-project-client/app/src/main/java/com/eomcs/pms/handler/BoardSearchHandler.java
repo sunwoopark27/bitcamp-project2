@@ -32,8 +32,8 @@ public class BoardSearchHandler implements Command {
       stmt.setString(3, keyword);
 
       try (ResultSet rs = stmt.executeQuery()) {
-        if(!rs.next()) {
-          System.out.println("검색어에 해당하는 게시글이 없습니다!");
+        if (!rs.next()) {
+          System.out.println("검색어에 해당하는 게시글이 없습니다.");
           return;
         }
 
@@ -44,12 +44,9 @@ public class BoardSearchHandler implements Command {
               rs.getString("writer"),
               rs.getDate("cdt"),
               rs.getInt("vw_cnt"));
-        } while(rs.next());
+        } while (rs.next());
       }
     }
-
-
-
   }
 }
 

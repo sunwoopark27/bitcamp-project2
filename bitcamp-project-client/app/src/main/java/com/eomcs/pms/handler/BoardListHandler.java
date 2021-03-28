@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 
 public class BoardListHandler implements Command {
 
-
   @Override
   public void service() throws Exception {
     System.out.println("[게시글 목록]");
@@ -19,14 +18,15 @@ public class BoardListHandler implements Command {
         ResultSet rs = stmt.executeQuery()) {
 
       while (rs.next()) {
-        System.out.printf("%s, %s, %s, %s, %s\n",
-            rs.getInt("no"),
-            rs.getString("title"),
+        System.out.printf("%d, %s, %s, %s, %d\n", 
+            rs.getInt("no"), 
+            rs.getString("title"), 
             rs.getString("writer"),
             rs.getDate("cdt"),
             rs.getInt("vw_cnt"));
       }
     }
+
   }
 }
 

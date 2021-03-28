@@ -14,33 +14,32 @@ public class ProjectDetailHandler implements Command {
 
     int no = Prompt.inputInt("번호? ");
 
-    try (Connection con = DriverManager.getConnection( //
+    try (Connection con = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
-        PreparedStatement stmt = con.prepareStatement( //
-            "select" 
-            + "    p.no,"
-            + "    p.title,"
-            + "    p.content,"
-            + "    p.sdt,"
-            + "    p.edt,"
-            + "    m.no as owner_no,"
-            + "    m.name as owner_name"
-            + "  from pms_project p"
-            + "    inner join pms_member m on p.owner=m.no"
-            + " where p.no=?");
-        PreparedStatement stmt2 = con.prepareStatement(
+        PreparedStatement stmt = con.prepareStatement(
             "select"
-                +"    m.no,"
-                +"    m.name"
-                +" from pms_member_project mp"
-                +"    inner join pms_member m on mp.member_no=m.no"
-                +" where"
-                +"    mp.project_no=?")) {
+                + "    p.no,"
+                + "    p.title,"
+                + "    p.content,"
+                + "    p.sdt,"
+                + "    p.edt,"
+                + "    m.no as owner_no,"
+                + "    m.name as owner_name"
+                + "  from pms_project p"
+                + "    inner join pms_member m on p.owner=m.no"
+                + " where p.no=?");
+        PreparedStatement stmt2 = con.prepareStatement(
+            "select" 
+                + "    m.no,"
+                + "    m.name"
+                + " from pms_member_project mp"
+                + "     inner join pms_member m on mp.member_no=m.no"
+                + " where "
+                + "     mp.project_no=?")) {
 
+      stmt.setInt(1, no);
 
-      stmt.setInt(1,no);
-
-      try(ResultSet rs = stmt.executeQuery()){
+      try (ResultSet rs = stmt.executeQuery()) {
         if (!rs.next()) {
           System.out.println("해당 번호의 프로젝트가 없습니다.");
           return;
@@ -56,14 +55,13 @@ public class ProjectDetailHandler implements Command {
 
         stmt2.setInt(1, no);
         try (ResultSet membersRs = stmt2.executeQuery()) {
-          while(membersRs.next()) {
-            if(strings.length() > 0) {
+          while (membersRs.next()) {
+            if (strings.length() > 0) {
               strings.append(",");
             }
             strings.append(membersRs.getString("name"));
           }
         }
-
         System.out.printf("팀원: %s\n", strings);
       }
     }
