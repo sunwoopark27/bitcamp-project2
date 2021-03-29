@@ -20,12 +20,18 @@ public class BoardSearchHandler implements Command {
     try (Connection con = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
         PreparedStatement stmt = con.prepareStatement(
-            "select no,title,writer,cdt,vw_cnt"
-                + " from pms_board"
-                + " where title like concat('%',?,'%')"
-                + " or content like concat('%',?,'%')"
-                + " or writer like concat('%',?,'%')"
-                + " order by no desc")) {
+            "select"
+                + " b.no,"
+                + " b.title,"
+                + " b.cdt,"
+                + " b.vw_cnt,"
+                + " m.name as writer_name"
+                + " from pms_board b"
+                + " inner join pms_member m on b.writer=m.no"
+                + " where b.title like concat('%',?,'%')"
+                + " or b.content like concat('%',?,'%')"
+                + " or m.name like concat('%',?,'%')"
+                + " order by b.no desc")) {
 
       stmt.setString(1, keyword);
       stmt.setString(2, keyword);
@@ -41,7 +47,7 @@ public class BoardSearchHandler implements Command {
           System.out.printf("%d, %s, %s, %s, %d\n", 
               rs.getInt("no"), 
               rs.getString("title"), 
-              rs.getString("writer"),
+              rs.getString("writer_name"),
               rs.getDate("cdt"),
               rs.getInt("vw_cnt"));
         } while (rs.next());
