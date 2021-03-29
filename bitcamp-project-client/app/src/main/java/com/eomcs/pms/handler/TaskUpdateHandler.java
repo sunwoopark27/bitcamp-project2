@@ -34,24 +34,12 @@ public class TaskUpdateHandler implements Command {
                 + "    inner join pms_member m on t.owner=m.no"
                 + " where t.no=?");
         PreparedStatement stmt2 = con.prepareStatement(
-            "select" 
-                + "    m.no,"
-                + "    m.name"
-                + " from pms_member_project mp"
-                + "     inner join pms_member m on mp.member_no=m.no"
-                + " where "
-                + "     mp.project_no=?");
-        PreparedStatement stmt3 = con.prepareStatement(
             "update pms_task set"
                 + " content=?,"
                 + " deadline=?,"
                 + " owner=?"
                 + " status=?"
-                + " where no=?");
-        PreparedStatement stmt4 = con.prepareStatement( 
-            "delete from pms_member_project where project_no=?");
-        PreparedStatement stmt5 = con.prepareStatement(
-            "insert into pms_member_project(member_no,project_no) values(?,?)")) { 
+                + " where no=?")) { 
 
       con.setAutoCommit(false);
 
@@ -90,13 +78,13 @@ public class TaskUpdateHandler implements Command {
         }
 
         // 4) DBMS에게 프로젝트 변경을 요청한다.
-        stmt3.setString(1, task.getContent());
-        stmt3.setDate(2, task.getDeadline());
-        stmt3.setInt(3, task.getOwner().getNo());
-        stmt3.setDate(4, task.getDeadline());
-        stmt3.setInt(5, task.getStatus());
-        stmt3.setInt(6, task.getNo());
-        stmt3.executeUpdate();
+        stmt2.setString(1, task.getContent());
+        stmt2.setDate(2, task.getDeadline());
+        stmt2.setInt(3, task.getOwner().getNo());
+        stmt2.setDate(4, task.getDeadline());
+        stmt2.setInt(5, task.getStatus());
+        stmt2.setInt(6, task.getNo());
+        stmt2.executeUpdate();
 
         con.commit();
 
