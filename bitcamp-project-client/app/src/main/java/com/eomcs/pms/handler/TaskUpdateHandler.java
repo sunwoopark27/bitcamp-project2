@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.domain.Task;
 import com.eomcs.util.Prompt;
 
@@ -84,20 +83,6 @@ public class TaskUpdateHandler implements Command {
           return;
         }
 
-        // 3) 작업 팀장 정보를 입력 받는다.
-        StringBuilder strings = new StringBuilder();
-        stmt2.setInt(1, no);
-        try (ResultSet membersRs = stmt2.executeQuery()) {
-          while (membersRs.next()) {
-            if (strings.length() > 0) {
-              strings.append(",");
-            }
-            strings.append(membersRs.getString("name"));
-          }
-        }
-        project.setMembers(memberValidator.inputMembers(
-            String.format("팀원(%s)?(완료: 빈 문자열) ", strings)));
-
         String input = Prompt.inputString("정말 변경하시겠습니까?(y/N) ");
         if (!input.equalsIgnoreCase("Y")) {
           System.out.println("프로젝트 변경을 취소하였습니다.");
@@ -105,24 +90,13 @@ public class TaskUpdateHandler implements Command {
         }
 
         // 4) DBMS에게 프로젝트 변경을 요청한다.
-        stmt3.setString(1, project.getTitle());
-        stmt3.setString(2, project.getContent());
-        stmt3.setDate(3, project.getStartDate());
-        stmt3.setDate(4, project.getEndDate());
-        stmt3.setInt(5, project.getOwner().getNo());
-        stmt3.setInt(6, project.getNo());
+        stmt3.setString(1, task.getContent());
+        stmt3.setDate(2, task.getDeadline());
+        stmt3.setInt(3, task.getOwner().getNo());
+        stmt3.setDate(4, task.getDeadline());
+        stmt3.setInt(5, task.getStatus());
+        stmt3.setInt(6, task.getNo());
         stmt3.executeUpdate();
-
-        // 5) 프로젝트의 기존 멤버를 삭제한다.
-        stmt4.setInt(1, project.getNo());
-        stmt4.executeUpdate();
-
-        // 6) 사용자가 선택한 프로젝트 멤버들을 추가한다.
-        for (Member member : project.getMembers()) {
-          stmt5.setInt(1, member.getNo());
-          stmt5.setInt(2, project.getNo());
-          stmt5.executeUpdate();
-        }
 
         con.commit();
 
