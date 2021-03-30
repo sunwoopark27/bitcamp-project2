@@ -4,6 +4,9 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import com.eomcs.pms.dao.BoardDao;
+import com.eomcs.pms.dao.MemberDao;
+import com.eomcs.pms.dao.ProjectDao;
 import com.eomcs.pms.handler.BoardAddHandler;
 import com.eomcs.pms.handler.BoardDeleteHandler;
 import com.eomcs.pms.handler.BoardDetailHandler;
@@ -56,26 +59,28 @@ public class ClientApp {
   }
 
   public void execute() throws Exception {
-
+    BoardDao boardDao = new BoardDao();
+    MemberDao memberDao = new MemberDao();
+    ProjectDao projectDao = new ProjectDao();
     // 사용자 명령을 처리하는 객체를 맵에 보관한다.
     HashMap<String,Command> commandMap = new HashMap<>();
 
-    commandMap.put("/member/add", new MemberAddHandler());
-    commandMap.put("/member/list", new MemberListHandler());
-    commandMap.put("/member/detail", new MemberDetailHandler());
-    commandMap.put("/member/update", new MemberUpdateHandler());
-    commandMap.put("/member/delete", new MemberDeleteHandler());
+    commandMap.put("/member/add", new MemberAddHandler(memberDao));
+    commandMap.put("/member/list", new MemberListHandler(memberDao));
+    commandMap.put("/member/detail", new MemberDetailHandler(memberDao));
+    commandMap.put("/member/update", new MemberUpdateHandler(memberDao));
+    commandMap.put("/member/delete", new MemberDeleteHandler(memberDao));
 
     MemberValidator memberValidator = new MemberValidator();
 
-    commandMap.put("/board/add", new BoardAddHandler(memberValidator));
-    commandMap.put("/board/list", new BoardListHandler());
-    commandMap.put("/board/detail", new BoardDetailHandler());
-    commandMap.put("/board/update", new BoardUpdateHandler());
-    commandMap.put("/board/delete", new BoardDeleteHandler());
-    commandMap.put("/board/search", new BoardSearchHandler());
+    commandMap.put("/board/add", new BoardAddHandler(boardDao));
+    commandMap.put("/board/list", new BoardListHandler(boardDao));
+    commandMap.put("/board/detail", new BoardDetailHandler(boardDao));
+    commandMap.put("/board/update", new BoardUpdateHandler(boardDao));
+    commandMap.put("/board/delete", new BoardDeleteHandler(boardDao));
+    commandMap.put("/board/search", new BoardSearchHandler(boardDao));
 
-    commandMap.put("/project/add", new ProjectAddHandler(memberValidator));
+    commandMap.put("/project/add", new ProjectAddHandler(projectDao,memberValidator));
     commandMap.put("/project/list", new ProjectListHandler());
     commandMap.put("/project/detail", new ProjectDetailHandler());
     commandMap.put("/project/update", new ProjectUpdateHandler(memberValidator));
@@ -133,6 +138,7 @@ public class ClientApp {
     } catch (Exception e) {
       System.out.println("서버와 통신 하는 중에 오류 발생!");
     }
+
 
     Prompt.close();
   }
