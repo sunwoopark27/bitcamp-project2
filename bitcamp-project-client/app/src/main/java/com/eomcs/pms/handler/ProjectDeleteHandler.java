@@ -4,11 +4,13 @@ import com.eomcs.pms.dao.ProjectDao;
 import com.eomcs.util.Prompt;
 
 public class ProjectDeleteHandler implements Command {
+
   ProjectDao projectDao;
 
   public ProjectDeleteHandler(ProjectDao projectDao) {
     this.projectDao = projectDao;
   }
+
   @Override
   public void service() throws Exception {
     System.out.println("[프로젝트 삭제]");
@@ -21,8 +23,12 @@ public class ProjectDeleteHandler implements Command {
       return;
     }
 
-    projectDao.delete(no);
-    System.out.println("프로젝트를 삭제하였습니다.");
+    if (projectDao.delete(no) == 0) {
+      System.out.println("해당 번호의 프로젝트가 없습니다.");
+
+    } else {
+      System.out.println("프로젝트를 삭제하였습니다.");
+    }
   }
 }
 

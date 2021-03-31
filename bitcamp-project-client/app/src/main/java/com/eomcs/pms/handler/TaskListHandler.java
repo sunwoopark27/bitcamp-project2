@@ -12,7 +12,6 @@ public class TaskListHandler implements Command {
   public TaskListHandler(TaskDao taskDao) {
     this.taskDao = taskDao;
   }
-
   @Override
   public void service() throws Exception {
     System.out.println("[작업 목록]");
@@ -39,11 +38,11 @@ public class TaskListHandler implements Command {
     }
 
     if (tasks.size() == 0) {
-      System.out.println("해당 번호의 프로젝트가 없거나 또는 등록된 작업이 없습니다.");
-      return;
+      System.out.println("해당 번호의 프로젝트가 없거나 등록된 작업이 없습니다."); 
     }
 
     projectNo = 0;
+
     for (Task t : tasks) {
       if (projectNo != t.getProjectNo()) {
         System.out.printf("'%s' 작업 목록: \n", t.getProjectTitle());
@@ -55,6 +54,7 @@ public class TaskListHandler implements Command {
           t.getDeadline(),
           t.getOwner().getName(),
           Task.getStatusLabel(t.getStatus()));
+
     }
   }
 }

@@ -9,13 +9,13 @@ import com.eomcs.util.Prompt;
 
 public class TaskUpdateHandler implements Command {
 
+  MemberValidator memberValidator;
   TaskDao taskDao;
   ProjectDao projectDao;
-  MemberValidator memberValidator;
 
-  public TaskUpdateHandler(TaskDao taskDao,ProjectDao projectDao, MemberValidator memberValidator) {
+  public TaskUpdateHandler(TaskDao taskDao,ProjectDao projectDao,MemberValidator memberValidator) {
     this.taskDao = taskDao;
-    this.projectDao = projectDao;
+    this.projectDao =projectDao;
     this.memberValidator = memberValidator;
   }
 
@@ -24,13 +24,17 @@ public class TaskUpdateHandler implements Command {
     System.out.println("[작업 변경]");
 
     int no = Prompt.inputInt("번호? ");
+
     Task task = taskDao.findByNo(no);
     if (task == null) {
       System.out.println("해당 번호의 작업이 없습니다.");
       return;
     }
-    System.out.printf("현재 프로젝트 명: %s \n", task.getProjectTitle());
 
+    // 2) 프로젝트 제목 출력
+    System.out.printf("현재 프로젝트: %s\n", task.getProjectTitle());
+
+    // 3) 현재 프로젝트 목록을 가져온다.
     List<Project> projects = projectDao.findAll();
     // 4) 프로젝트 목록을 출력한다.
     System.out.println("프로젝트들:");
@@ -38,16 +42,15 @@ public class TaskUpdateHandler implements Command {
       System.out.println("현재 등록된 프로젝트가 없습니다!");
       return;
     }
-
     for (Project p : projects) {
-      System.out.printf("   %d, %s\n", p.getNo(), p.getTitle());
+      System.out.printf("  %d, %s\n", p.getNo(), p.getTitle());
     }
 
     // 5) 현재 작업이 소속된 프로젝트를 변경한다.
     int selectedProjectNo = 0;
     loop: while (true) {
       try {
-        selectedProjectNo = Prompt.inputInt("변경할 프로젝트 번호?(0: 취소) ");
+        selectedProjectNo = Prompt.inputInt("변경할 프로젝트 번호?(취소: 0) ");
         if (selectedProjectNo == 0) {
           System.out.println("기존 프로젝트를 유지합니다.");
           break loop;
@@ -58,6 +61,7 @@ public class TaskUpdateHandler implements Command {
           }
         }
         System.out.println("유효하지 않은 프로젝트 번호 입니다.");
+
       } catch (Exception e) {
         System.out.println("숫자를 입력하세요!");
       }
@@ -67,7 +71,7 @@ public class TaskUpdateHandler implements Command {
       task.setProjectNo(selectedProjectNo);
     }
 
-    // 사용자에게서 변경할 데이터를 입력 받는다.
+    // 2) 사용자에게서 변경할 데이터를 입력 받는다.
     task.setContent(Prompt.inputString(String.format("내용(%s)? ", task.getContent())));
     task.setDeadline(Prompt.inputDate(String.format("마감일(%s)? ", task.getDeadline())));
     task.setStatus(Prompt.inputInt(String.format(
@@ -87,7 +91,6 @@ public class TaskUpdateHandler implements Command {
       return;
     }
 
-    // 7) DBMS에게 게시글 변경을 요청한다.
     taskDao.update(task);
     System.out.println("작업을 변경하였습니다.");
   }

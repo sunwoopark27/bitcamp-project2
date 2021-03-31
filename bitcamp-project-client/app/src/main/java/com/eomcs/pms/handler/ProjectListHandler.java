@@ -12,13 +12,14 @@ public class ProjectListHandler implements Command {
   public ProjectListHandler(ProjectDao projectDao) {
     this.projectDao = projectDao;
   }
+
   @Override
   public void service() throws Exception {
     System.out.println("[프로젝트 목록]");
 
     List<Project> projects = projectDao.findAll();
 
-    for(Project p : projects) {
+    for (Project p : projects) {
 
       // 1) 프로젝트의 팀원 목록 가져오기
       StringBuilder strBuilder = new StringBuilder();
@@ -41,6 +42,7 @@ public class ProjectListHandler implements Command {
     }
   }
 }
+
 
 
 

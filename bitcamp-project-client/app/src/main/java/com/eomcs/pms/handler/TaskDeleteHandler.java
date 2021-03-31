@@ -6,9 +6,11 @@ import com.eomcs.util.Prompt;
 public class TaskDeleteHandler implements Command {
 
   TaskDao taskDao;
+
   public TaskDeleteHandler(TaskDao taskDao) {
     this.taskDao = taskDao;
   }
+
   @Override
   public void service() throws Exception {
     System.out.println("[작업 삭제]");
@@ -28,4 +30,3 @@ public class TaskDeleteHandler implements Command {
     }
   }
 }
-

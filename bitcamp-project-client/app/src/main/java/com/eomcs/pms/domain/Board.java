@@ -11,8 +11,12 @@ public class Board {
   private int viewCount;
   private int like;
 
-  public Board() {}
-
+  @Override
+  public String toString() {
+    return "Board [no=" + no + ", title=" + title + ", content=" + content + ", writer=" + writer
+        + ", registeredDate=" + registeredDate + ", viewCount=" + viewCount + ", like=" + like
+        + "]";
+  }
   public int getNo() {
     return no;
   }
@@ -31,15 +35,12 @@ public class Board {
   public void setContent(String content) {
     this.content = content;
   }
-
   public Member getWriter() {
     return writer;
   }
-
   public void setWriter(Member writer) {
     this.writer = writer;
   }
-
   public Date getRegisteredDate() {
     return registeredDate;
   }

@@ -5,10 +5,13 @@ import com.eomcs.pms.domain.Task;
 import com.eomcs.util.Prompt;
 
 public class TaskDetailHandler implements Command {
+
   TaskDao taskDao;
+
   public TaskDetailHandler(TaskDao taskDao) {
     this.taskDao = taskDao;
   }
+
   @Override
   public void service() throws Exception {
     System.out.println("[작업 상세보기]");
@@ -25,6 +28,6 @@ public class TaskDetailHandler implements Command {
     System.out.printf("내용: %s\n", task.getContent());
     System.out.printf("마감일: %s\n", task.getDeadline());
     System.out.printf("상태: %s\n", Task.getStatusLabel(task.getStatus()));
-    System.out.printf("관리자: %s\n", task.getOwner().getName());
+    System.out.printf("담당자: %s\n", task.getOwner().getName());
   }
 }

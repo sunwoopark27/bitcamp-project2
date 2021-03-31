@@ -10,8 +10,8 @@ public class ProjectAddHandler implements Command {
   MemberValidator memberValidator;
 
   public ProjectAddHandler(ProjectDao projectDao, MemberValidator memberValidator) {
-    this.memberValidator = memberValidator;
     this.projectDao = projectDao;
+    this.memberValidator = memberValidator;
   }
 
   @Override
@@ -33,10 +33,10 @@ public class ProjectAddHandler implements Command {
     p.setMembers(memberValidator.inputMembers("팀원?(완료: 빈 문자열) "));
 
     projectDao.insert(p);
+
     System.out.println("프로젝트를 등록했습니다.");
   }
 }
-
 
 
 
