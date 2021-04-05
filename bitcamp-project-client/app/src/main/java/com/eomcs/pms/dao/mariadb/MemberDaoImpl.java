@@ -1,7 +1,6 @@
 package com.eomcs.pms.dao.mariadb;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -16,13 +15,16 @@ public class MemberDaoImpl implements MemberDao{
 
   Connection con;
 
-  public MemberDaoImpl() throws Exception {
-    this.con = DriverManager.getConnection(
-        "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
+  //Connection 객체를 자체적으로 생성하지 않고 외부에서 주입받는다.
+  // - Connection 객체를 여러 DAO가 공유할 수 있다.
+  // - 교체하기도 쉽다.
+  public MemberDaoImpl(Connection con) throws Exception {
+    this.con = con;
   }
 
   // 이제 메서드들은 인스턴스 필드에 들어있는 Connection 객체를 사용해야 하기 때문에
   // 스태틱 메서드가 아닌 인스턴스 메서드로 선언해야 한다.
+  @Override
   public int insert(Member member) throws Exception {
     try (PreparedStatement stmt = con.prepareStatement(
         "insert into pms_member(name,email,password,photo,tel) values(?,?,password(?),?,?)");) {
@@ -36,6 +38,7 @@ public class MemberDaoImpl implements MemberDao{
     }
   }
 
+  @Override
   public List<Member> findAll() throws Exception {
     ArrayList<Member> list = new ArrayList<>();
 
@@ -58,6 +61,7 @@ public class MemberDaoImpl implements MemberDao{
     return list;
   }
 
+  @Override
   public Member findByNo(int no) throws Exception {
     try (PreparedStatement stmt = con.prepareStatement(
         "select * from pms_member where no = ?")) {
@@ -82,6 +86,7 @@ public class MemberDaoImpl implements MemberDao{
     }
   }
 
+  @Override
   public int update(Member member) throws Exception {
     try (PreparedStatement stmt = con.prepareStatement(
         "update pms_member set name=?,email=?,password=password(?),photo=?,tel=? where no=?")) {
@@ -95,6 +100,7 @@ public class MemberDaoImpl implements MemberDao{
     }
   }
 
+  @Override
   public int delete(int no) throws Exception {
     try (PreparedStatement stmt = con.prepareStatement(
         "delete from pms_member where no=?")) {
@@ -103,6 +109,7 @@ public class MemberDaoImpl implements MemberDao{
     }
   }
 
+  @Override
   public Member findByName(String name) throws Exception {
     try (PreparedStatement stmt = con.prepareStatement(
         "select * from pms_member where name=?")) {

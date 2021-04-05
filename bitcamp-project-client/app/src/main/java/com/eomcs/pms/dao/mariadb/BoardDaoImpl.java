@@ -2,7 +2,6 @@ package com.eomcs.pms.dao.mariadb;
 
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -15,10 +14,13 @@ public class BoardDaoImpl implements BoardDao {
 
   Connection con;
 
-  public BoardDaoImpl() throws Exception {
-    this.con = DriverManager.getConnection(
-        "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
+  // Connection 객체를 자체적으로 생성하지 않고 외부에서 주입받는다.
+  // - Connection 객체를 여러 DAO가 공유할 수 있다.
+  // - 교체하기도 쉽다.
+  public BoardDaoImpl(Connection con) throws Exception {
+    this.con = con;
   }
+
   @Override
   public int insert(Board board) throws Exception {
     try (PreparedStatement stmt = con.prepareStatement(
