@@ -150,6 +150,14 @@
     values(#{memberNo}, #{projectNo})
   </insert>
   
+  <insert id="insertMembers" parameterType="map">
+    insert into pms_member_project(member_no,project_no) 
+    values
+    <foreach collection="members" item="m" separator=",">
+      (#{m.no}, #{projectNo})
+    </foreach>
+  </insert>
+  
   <delete id="deleteMembers" parameterType="int">
     delete from pms_member_project 
     where project_no=#{value}
