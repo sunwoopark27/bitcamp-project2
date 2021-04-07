@@ -23,9 +23,11 @@ public class TaskAddHandler implements Command {
   public void service() throws Exception {
     System.out.println("[작업 등록]");
 
-    List<Project> projects = projectDao.findAll();
+    // 1) 현재 등록된 프로젝트 목록을 가져온다.
+    List<Project> projects = projectDao.findByKeyword(null, null);
 
-    // 프로젝트 목록을 출력한다.
+
+    // 2) 프로젝트 목록을 출력한다.
     System.out.println("프로젝트들:");
     if (projects.size() == 0) {
       System.out.println("현재 등록된 프로젝트가 없습니다!");
@@ -35,7 +37,7 @@ public class TaskAddHandler implements Command {
       System.out.printf("  %d, %s\n", p.getNo(), p.getTitle());
     }
 
-    // 작업을 등록할 프로젝트를 선택한다.
+    // 3) 작업을 등록할 프로젝트를 선택한다.
     int selectedProjectNo = 0;
     loop: while (true) {
       String input = Prompt.inputString("프로젝트 번호?(취소: 빈 문자열) ");
@@ -69,9 +71,9 @@ public class TaskAddHandler implements Command {
       System.out.println("작업 등록을 취소하였습니다.");
       return;
     }
+
     taskDao.insert(t);
 
     System.out.println("작업을 등록했습니다.");
   }
 }
-

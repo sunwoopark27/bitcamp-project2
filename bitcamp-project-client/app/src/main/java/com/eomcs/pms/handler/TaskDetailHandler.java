@@ -8,8 +8,8 @@ public class TaskDetailHandler implements Command {
 
   TaskDao taskDao;
 
-  public TaskDetailHandler(TaskDao taskDao) {
-    this.taskDao = taskDao;
+  public TaskDetailHandler(TaskDao taskdao) {
+    this.taskDao = taskdao;
   }
 
   @Override
@@ -19,6 +19,7 @@ public class TaskDetailHandler implements Command {
     int no = Prompt.inputInt("번호? ");
 
     Task task = taskDao.findByNo(no);
+
     if (task == null) {
       System.out.println("해당 번호의 작업이 없습니다.");
       return;

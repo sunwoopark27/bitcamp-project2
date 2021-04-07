@@ -12,6 +12,7 @@ public interface MemberDao {
   Member findByNo(int no) throws Exception;
 
   int update(Member member) throws Exception;
+
   int delete(int no) throws Exception;
 
   Member findByName(String name) throws Exception;
