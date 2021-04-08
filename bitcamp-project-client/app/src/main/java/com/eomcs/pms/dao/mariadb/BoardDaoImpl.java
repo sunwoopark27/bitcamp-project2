@@ -16,9 +16,7 @@ public class BoardDaoImpl implements BoardDao {
 
   @Override
   public int insert(Board board) throws Exception {
-    int count =  sqlSession.insert("BoardMapper.insert", board);
-    sqlSession.commit();
-    return count;
+    return sqlSession.insert("BoardMapper.insert", board);
   }
 
   @Override
@@ -28,23 +26,17 @@ public class BoardDaoImpl implements BoardDao {
 
   @Override
   public int update(Board board) throws Exception {
-    int count = sqlSession.update("BoardMapper.update", board);
-    sqlSession.commit();
-    return count;
+    return sqlSession.update("BoardMapper.update", board);
   }
 
   @Override
   public int updateViewCount(int no) throws Exception {
-    int count = sqlSession.update("BoardMapper.updateViewCount", no);
-    sqlSession.commit();
-    return count;
+    return sqlSession.update("BoardMapper.updateViewCount", no);
   }
 
   @Override
   public int delete(int no) throws Exception {
-    int count = sqlSession.delete("BoardMapper.delete", no);
-    sqlSession.commit();
-    return count;
+    return sqlSession.delete("BoardMapper.delete", no);
   }
 
   @Override

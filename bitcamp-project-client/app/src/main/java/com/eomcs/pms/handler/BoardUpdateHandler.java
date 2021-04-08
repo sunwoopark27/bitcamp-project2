@@ -1,19 +1,19 @@
 package com.eomcs.pms.handler;
 
-import com.eomcs.pms.dao.BoardDao;
 import com.eomcs.pms.domain.Board;
+import com.eomcs.pms.service.BoardService;
 import com.eomcs.util.Prompt;
 
 public class BoardUpdateHandler implements Command {
 
 
   // 핸들러가 사용할 DAO : 의존 객체(dependency)
-  BoardDao boardDao;
+  BoardService boardService;
 
   // DAO 객체는 이 클래스가 작업하는데 필수 객체이기 때문에
   // 생성자를 통해 반드시 주입 받도록 한다.
-  public BoardUpdateHandler(BoardDao boardDao) {
-    this.boardDao = boardDao;
+  public BoardUpdateHandler(BoardService boardService) {
+    this.boardService = boardService;
   }
 
   @Override
@@ -29,7 +29,7 @@ public class BoardUpdateHandler implements Command {
     //    동일한 객체를 계속해서 만들지 않기 위해서이다.
     // => 동일한 객체인지 어떻게 아는가?
     //    PK에 해당하는 프로퍼티 값이 같을 경우 같은 객체로 간주한다.
-    Board oldBoard = boardDao.findByNo(no);
+    Board oldBoard = boardService.detail(no);
     if (oldBoard == null) {
       System.out.println("해당 번호의 게시글이 없습니다.");
       return;
@@ -46,7 +46,7 @@ public class BoardUpdateHandler implements Command {
       return;
     }
 
-    boardDao.update(board);
+    boardService.update(board);
 
     System.out.println("게시글을 변경하였습니다.");
   }
