@@ -12,7 +12,7 @@ import com.eomcs.pms.service.ProjectService;
 // - 비즈니스 로직을 담고 있다.
 // - 업무에 따라 트랜젝션을 제어하는 일을 한다.
 // - 서비스 객체의 메서드는 가능한 업무관련 용어를 사용하여 메서드를 정의한다.
-public class DefaultProjectService implements ProjectService{
+public class DefaultProjectService implements ProjectService {
   SqlSession sqlSession;
   ProjectDao projectDao;
   TaskDao taskDao;
@@ -24,6 +24,7 @@ public class DefaultProjectService implements ProjectService{
   }
 
   // 등록 업무
+  @Override
   public int add(Project project) throws Exception {
     try {
       // 1) 프로젝트 정보를 입력한다.
@@ -41,16 +42,19 @@ public class DefaultProjectService implements ProjectService{
     }
   }
   // 목록 조회 업무
+  @Override
   public List<Project> list() throws Exception {
     return projectDao.findByKeyword(null, null);
   }
   // 상세 조회 업무
+  @Override
   public Project get(int no) throws Exception {
     return projectDao.findByNo(no);
   }
 
   // 변경 업무
 
+  @Override
   public int update(Project project) throws Exception {
     try {
       int count = projectDao.update(project);
@@ -66,6 +70,7 @@ public class DefaultProjectService implements ProjectService{
     }
   }
 
+  @Override
   public int delete(int no) throws Exception {
     try {
 
@@ -84,20 +89,24 @@ public class DefaultProjectService implements ProjectService{
   }
 
   // 찾기
+  @Override
   public List<Project> search(String title, String owner, String member) throws Exception {
     return projectDao.findByKeywords(title, owner, member);
   }
 
+  @Override
   public List<Project> search(String item, String keyword) throws Exception {
     return projectDao.findByKeyword(item, keyword);
   }
 
 
+  @Override
   public int deleteMembers(int projectNo) throws Exception{
     int count = projectDao.deleteMembers(projectNo);
     return count;
   }
 
+  @Override
   public int updateMembers(int projectNo, List<Member> members) throws Exception {
     try{
       projectDao.deleteMembers(projectNo);
