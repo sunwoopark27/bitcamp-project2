@@ -29,7 +29,7 @@ public class BoardService {
     return boardDao.findByKeyword(null);
   }
   //게시글 상세 조회 업무
-  public Board detail(int no) throws Exception {
+  public Board get(int no) throws Exception {
     Board board = boardDao.findByNo(no);
     if(board != null) {
       boardDao.updateViewCount(no);

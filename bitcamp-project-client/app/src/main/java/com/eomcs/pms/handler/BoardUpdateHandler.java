@@ -29,7 +29,7 @@ public class BoardUpdateHandler implements Command {
     //    동일한 객체를 계속해서 만들지 않기 위해서이다.
     // => 동일한 객체인지 어떻게 아는가?
     //    PK에 해당하는 프로퍼티 값이 같을 경우 같은 객체로 간주한다.
-    Board oldBoard = boardService.detail(no);
+    Board oldBoard = boardService.get(no);
     if (oldBoard == null) {
       System.out.println("해당 번호의 게시글이 없습니다.");
       return;
