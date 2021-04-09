@@ -1,16 +1,16 @@
 package com.eomcs.pms.handler;
 
-import com.eomcs.pms.dao.ProjectDao;
 import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.domain.Project;
+import com.eomcs.pms.service.ProjectService;
 import com.eomcs.util.Prompt;
 
 public class ProjectMemberDeleteHandler implements Command {
 
-  ProjectDao projectDao;
+  ProjectService projectService;
 
-  public ProjectMemberDeleteHandler(ProjectDao projectDao) {
-    this.projectDao = projectDao;
+  public ProjectMemberDeleteHandler(ProjectService projectService) {
+    this.projectService = projectService;
   }
 
   @Override
@@ -19,7 +19,7 @@ public class ProjectMemberDeleteHandler implements Command {
 
     int no = Prompt.inputInt("프로젝트 번호? ");
 
-    Project project = projectDao.findByNo(no);
+    Project project = projectService.get(no);
 
     if (project == null) {
       System.out.println("해당 번호의 프로젝트가 없습니다.");
@@ -38,7 +38,7 @@ public class ProjectMemberDeleteHandler implements Command {
       System.out.println("프로젝트의 멤버 삭제를 취소하였습니다.");
       return;
     }
-    projectDao.deleteMembers(no);
+    projectService.deleteMembers(no);
 
     System.out.println("프로젝트 멤버를 삭제하였습니다.");
   }
