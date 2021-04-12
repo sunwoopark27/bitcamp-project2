@@ -13,10 +13,6 @@ import com.eomcs.pms.dao.BoardDao;
 import com.eomcs.pms.dao.MemberDao;
 import com.eomcs.pms.dao.ProjectDao;
 import com.eomcs.pms.dao.TaskDao;
-import com.eomcs.pms.dao.mariadb.BoardDaoImpl;
-import com.eomcs.pms.dao.mariadb.MemberDaoImpl;
-import com.eomcs.pms.dao.mariadb.ProjectDaoImpl;
-import com.eomcs.pms.dao.mariadb.TaskDaoImpl;
 import com.eomcs.pms.handler.BoardAddHandler;
 import com.eomcs.pms.handler.BoardDeleteHandler;
 import com.eomcs.pms.handler.BoardDetailHandler;
@@ -44,6 +40,7 @@ import com.eomcs.pms.handler.TaskDeleteHandler;
 import com.eomcs.pms.handler.TaskDetailHandler;
 import com.eomcs.pms.handler.TaskListHandler;
 import com.eomcs.pms.handler.TaskUpdateHandler;
+import com.eomcs.pms.mybatis.MybatisDaoFactory;
 import com.eomcs.pms.service.BoardService;
 import com.eomcs.pms.service.MemberService;
 import com.eomcs.pms.service.ProjectService;
@@ -93,11 +90,14 @@ public class ClientApp {
     // => 수동 commit 으로 동작하는 SqlSession 객체를 준비한다.
     SqlSession sqlSession = sqlSessionFactory.openSession(false);
 
+    // DAO 구현체를 만들어주는 공장 객체를 준비한다.
+    MybatisDaoFactory daoFactory = new MybatisDaoFactory(sqlSession);
+
     // 핸들러가 사용할 DAO 객체 준비
-    BoardDao boardDao = new BoardDaoImpl(sqlSession);
-    MemberDao memberDao = new MemberDaoImpl(sqlSession);
-    ProjectDao projectDao = new ProjectDaoImpl(sqlSession);
-    TaskDao taskDao = new TaskDaoImpl(sqlSession);
+    BoardDao boardDao = daoFactory.createDao(BoardDao.class);
+    MemberDao memberDao = daoFactory.createDao(MemberDao.class);
+    ProjectDao projectDao = daoFactory.createDao(ProjectDao.class);
+    TaskDao taskDao = daoFactory.createDao(TaskDao.class);
 
     BoardService boardService = new DefaultBoardService(sqlSession, boardDao);
     MemberService memberService = new DefaultMemberService(sqlSession, memberDao);
@@ -176,6 +176,7 @@ public class ClientApp {
         } catch (Exception e) {
           System.out.println("------------------------------------------");
           System.out.printf("명령어 실행 중 오류 발생: %s\n", e.getMessage());
+          e.printStackTrace();
           System.out.println("------------------------------------------");
         }
         System.out.println(); // 이전 명령의 실행을 구분하기 위해 빈 줄 출력
