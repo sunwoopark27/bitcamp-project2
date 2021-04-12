@@ -1,5 +1,6 @@
 package com.eomcs.pms.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import org.apache.ibatis.session.SqlSession;
 import com.eomcs.pms.dao.ProjectDao;
@@ -31,7 +32,10 @@ public class DefaultProjectService implements ProjectService {
       int count = projectDao.insert(project);
 
       // 2) 멤버를 입력한다.
-      projectDao.insertMembers(project.getNo(), project.getMembers());
+      HashMap<String,Object> params = new HashMap<>();
+      params.put("projectNo", project.getNo());
+      params.put("members", project.getMembers());
+      projectDao.insertMembers(params);
 
       sqlSession.commit();
       return count;
@@ -44,7 +48,7 @@ public class DefaultProjectService implements ProjectService {
   // 목록 조회 업무
   @Override
   public List<Project> list() throws Exception {
-    return projectDao.findByKeyword(null, null);
+    return projectDao.findByKeyword(null);
   }
   // 상세 조회 업무
   @Override
@@ -59,7 +63,11 @@ public class DefaultProjectService implements ProjectService {
     try {
       int count = projectDao.update(project);
       deleteMembers(project.getNo());
-      projectDao.insertMembers(project.getNo(), project.getMembers());
+      HashMap<String,Object> params = new HashMap<>();
+      params.put("projectNo", project.getNo());
+      params.put("members", project.getMembers());
+
+      projectDao.insertMembers(params);
 
       sqlSession.commit();
       return count;
@@ -91,12 +99,23 @@ public class DefaultProjectService implements ProjectService {
   // 찾기
   @Override
   public List<Project> search(String title, String owner, String member) throws Exception {
-    return projectDao.findByKeywords(title, owner, member);
+
+    HashMap<String,Object> params = new HashMap<>();
+    params.put("title", title);
+    params.put("owner", owner);
+    params.put("member", member);
+
+    return projectDao.findByKeywords(params);
   }
 
   @Override
   public List<Project> search(String item, String keyword) throws Exception {
-    return projectDao.findByKeyword(item, keyword);
+
+    HashMap<String,Object> params = new HashMap<>();
+    params.put("item", item);
+    params.put("keyword", keyword);
+
+    return projectDao.findByKeyword(params);
   }
 
 
@@ -110,7 +129,12 @@ public class DefaultProjectService implements ProjectService {
   public int updateMembers(int projectNo, List<Member> members) throws Exception {
     try{
       projectDao.deleteMembers(projectNo);
-      int count = projectDao.insertMembers(projectNo, members);
+
+      HashMap<String,Object> params = new HashMap<>();
+      params.put("projectNo", projectNo);
+      params.put("members", members);
+
+      int count = projectDao.insertMembers(params);
       sqlSession.commit();
       return count;
     } catch (Exception e) {
