@@ -1,61 +1,12 @@
 package com.eomcs.pms;
 
-import java.io.InputStream;
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import com.eomcs.pms.dao.BoardDao;
-import com.eomcs.pms.dao.MemberDao;
-import com.eomcs.pms.dao.ProjectDao;
-import com.eomcs.pms.dao.TaskDao;
-import com.eomcs.pms.handler.BoardAddHandler;
-import com.eomcs.pms.handler.BoardDeleteHandler;
-import com.eomcs.pms.handler.BoardDetailHandler;
-import com.eomcs.pms.handler.BoardListHandler;
-import com.eomcs.pms.handler.BoardSearchHandler;
-import com.eomcs.pms.handler.BoardUpdateHandler;
-import com.eomcs.pms.handler.Command;
-import com.eomcs.pms.handler.MemberAddHandler;
-import com.eomcs.pms.handler.MemberDeleteHandler;
-import com.eomcs.pms.handler.MemberDetailHandler;
-import com.eomcs.pms.handler.MemberListHandler;
-import com.eomcs.pms.handler.MemberUpdateHandler;
-import com.eomcs.pms.handler.MemberValidator;
-import com.eomcs.pms.handler.ProjectAddHandler;
-import com.eomcs.pms.handler.ProjectDeleteHandler;
-import com.eomcs.pms.handler.ProjectDetailHandler;
-import com.eomcs.pms.handler.ProjectDetailSearchHandler;
-import com.eomcs.pms.handler.ProjectListHandler;
-import com.eomcs.pms.handler.ProjectMemberDeleteHandler;
-import com.eomcs.pms.handler.ProjectMemberUpdateHandler;
-import com.eomcs.pms.handler.ProjectSearchHandler;
-import com.eomcs.pms.handler.ProjectUpdateHandler;
-import com.eomcs.pms.handler.TaskAddHandler;
-import com.eomcs.pms.handler.TaskDeleteHandler;
-import com.eomcs.pms.handler.TaskDetailHandler;
-import com.eomcs.pms.handler.TaskListHandler;
-import com.eomcs.pms.handler.TaskUpdateHandler;
-import com.eomcs.pms.mybatis.MybatisDaoFactory;
-import com.eomcs.pms.service.BoardService;
-import com.eomcs.pms.service.MemberService;
-import com.eomcs.pms.service.ProjectService;
-import com.eomcs.pms.service.TaskService;
-import com.eomcs.pms.service.impl.DefaultBoardService;
-import com.eomcs.pms.service.impl.DefaultMemberService;
-import com.eomcs.pms.service.impl.DefaultProjectService;
-import com.eomcs.pms.service.impl.DefaultTaskService;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import com.eomcs.util.Prompt;
 
 public class ClientApp {
-
-  // 사용자가 입력한 명령을 저장할 컬렉션 객체 준비
-  ArrayDeque<String> commandStack = new ArrayDeque<>();
-  LinkedList<String> commandQueue = new LinkedList<>();
 
   String serverAddress;
   int port;
@@ -79,66 +30,16 @@ public class ClientApp {
 
   public void execute() throws Exception {
 
-    // Mybatis 설정 파일을 읽을 입력 스트림 객체 준비
-    InputStream mybatisConfigStream = Resources.getResourceAsStream(
-        "com/eomcs/pms/conf/mybatis-config.xml");
+    try (
+        // Stateful 통신 방식
+        // 1) 서버와 연결하
+        Socket socket = new Socket(serverAddress, port);
 
-    // SqlSessionFactory 객체 준비
-    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(mybatisConfigStream);
-
-    // DAO가 사용할 SqlSession 객체 준비
-    // => 수동 commit 으로 동작하는 SqlSession 객체를 준비한다.
-    SqlSession sqlSession = sqlSessionFactory.openSession(false);
-
-    // DAO 구현체를 만들어주는 공장 객체를 준비한다.
-    MybatisDaoFactory daoFactory = new MybatisDaoFactory(sqlSession);
-
-    // 핸들러가 사용할 DAO 객체 준비
-    BoardDao boardDao = daoFactory.createDao(BoardDao.class);
-    MemberDao memberDao = daoFactory.createDao(MemberDao.class);
-    ProjectDao projectDao = daoFactory.createDao(ProjectDao.class);
-    TaskDao taskDao = daoFactory.createDao(TaskDao.class);
-
-    BoardService boardService = new DefaultBoardService(sqlSession, boardDao);
-    MemberService memberService = new DefaultMemberService(sqlSession, memberDao);
-    ProjectService projectService = new DefaultProjectService(sqlSession, projectDao, taskDao);
-    TaskService taskService = new DefaultTaskService(sqlSession, taskDao);
-
-    // 사용자 명령을 처리하는 객체를 맵에 보관한다.
-    HashMap<String,Command> commandMap = new HashMap<>();
-
-    commandMap.put("/board/add", new BoardAddHandler(boardService));
-    commandMap.put("/board/list", new BoardListHandler(boardService));
-    commandMap.put("/board/detail", new BoardDetailHandler(boardService));
-    commandMap.put("/board/update", new BoardUpdateHandler(boardService));
-    commandMap.put("/board/delete", new BoardDeleteHandler(boardService));
-    commandMap.put("/board/search", new BoardSearchHandler(boardService));
-
-    commandMap.put("/member/add", new MemberAddHandler(memberService));
-    commandMap.put("/member/list", new MemberListHandler(memberService));
-    commandMap.put("/member/detail", new MemberDetailHandler(memberService));
-    commandMap.put("/member/update", new MemberUpdateHandler(memberService));
-    commandMap.put("/member/delete", new MemberDeleteHandler(memberService));
-
-    MemberValidator memberValidator = new MemberValidator(memberService);
-
-    commandMap.put("/project/add", new ProjectAddHandler(projectService, memberValidator));
-    commandMap.put("/project/list", new ProjectListHandler(projectService));
-    commandMap.put("/project/detail", new ProjectDetailHandler(projectService));
-    commandMap.put("/project/update", new ProjectUpdateHandler(projectService, memberValidator));
-    commandMap.put("/project/delete", new ProjectDeleteHandler(projectService));
-    commandMap.put("/project/search", new ProjectSearchHandler(projectService));
-    commandMap.put("/project/detailSearch", new ProjectDetailSearchHandler(projectService));
-    commandMap.put("/project/memberUpdate", new ProjectMemberUpdateHandler(projectService, memberValidator));
-    commandMap.put("/project/memberDelete", new ProjectMemberDeleteHandler(projectService));
-
-    commandMap.put("/task/add", new TaskAddHandler(taskService, projectService, memberValidator));
-    commandMap.put("/task/list", new TaskListHandler(taskService));
-    commandMap.put("/task/detail", new TaskDetailHandler(taskService));
-    commandMap.put("/task/update", new TaskUpdateHandler(taskService, projectService, memberValidator));
-    commandMap.put("/task/delete", new TaskDeleteHandler(taskService));
-
-    try {
+        // 2) 데이터 입출력 스트림 객체를 준비 
+        PrintWriter out = new PrintWriter(socket.getOutputStream()); // 어댑터 연결할 필요 없음
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        // INputStreamReader 가 어댑터 역할 
+        ){
 
       while (true) {
 
@@ -148,58 +49,33 @@ public class ClientApp {
           continue;
         }
 
-        // 사용자가 입력한 명령을 보관해둔다.
-        commandStack.push(command);
-        commandQueue.offer(command);
+        // 서버에 명령을 보낸 후 그 결과를 받아 출력한다.
 
-        try {
-          switch (command) {
-            case "history":
-              printCommandHistory(commandStack.iterator());
-              break;
-            case "history2":
-              printCommandHistory(commandQueue.iterator());
-              break;
-            case "quit":
-            case "exit":
-              System.out.println("안녕!");
-              return;
-            default:
-              Command commandHandler = commandMap.get(command);
+        out.println(command);
+        out.println();
+        out.flush();
 
-              if (commandHandler == null) {
-                System.out.println("실행할 수 없는 명령입니다.");
-              } else {
-                commandHandler.service();
-              }
+        String line = null;
+        while (true) {
+          line = in.readLine(); 
+          // 응답 중간에 빈 ㅁㄴ자열이 안들어간다는 전제하
+          if (line.length() == 0) {
+            System.out.println();
+            break;
           }
-        } catch (Exception e) {
-          System.out.println("------------------------------------------");
-          System.out.printf("명령어 실행 중 오류 발생: %s\n", e.getMessage());
-          e.printStackTrace();
-          System.out.println("------------------------------------------");
+          System.out.println(line);
         }
-        System.out.println(); // 이전 명령의 실행을 구분하기 위해 빈 줄 출력
-      }
+        System.out.println(); //명령의 실행을 구분하기 위해 빈 줄 출력  
 
-    } catch (Exception e) {
-      System.out.println("서버와 통신 하는 중에 오류 발생!");
-    }
-
-    sqlSession.close();
-    Prompt.close();
-  }
-
-  private void printCommandHistory(Iterator<String> iterator) {
-    int count = 0;
-    while (iterator.hasNext()) {
-      System.out.println(iterator.next());
-      if ((++count % 5) == 0) {
-        String input = Prompt.inputString(": ");
-        if (input.equalsIgnoreCase("q")) {
+        if (command.equalsIgnoreCase("quit") || command.equalsIgnoreCase("exit")) {
+          System.out.println("안녕!");
           break;
         }
       }
+    } catch (Exception e) {
+      System.out.println("통신오류 발생!");
     }
+
+    Prompt.close();
   }
 }
