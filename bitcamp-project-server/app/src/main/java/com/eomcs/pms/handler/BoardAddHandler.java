@@ -38,7 +38,7 @@ public class BoardAddHandler implements Command {
     b.setWriter(writer);
 
     boardService.add(b);
-    System.out.println("게시글을 등록하였습니다.");
+    out.println("게시글을 등록하였습니다.");
   }
 }
 
