@@ -26,7 +26,7 @@ public class BoardListHandler implements Command {
     List<Board> boards = boardService.list();
 
     for (Board b : boards) {
-      System.out.printf("%d, %s, %s, %s, %d\n", 
+      out.printf("%d, %s, %s, %s, %d\n", 
           b.getNo(), 
           b.getTitle(), 
           b.getWriter().getName(),

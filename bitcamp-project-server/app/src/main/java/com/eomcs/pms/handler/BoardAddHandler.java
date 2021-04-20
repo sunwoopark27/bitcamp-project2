@@ -24,15 +24,17 @@ public class BoardAddHandler implements Command {
   @Override
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
+    Prompt prompt = request.getPrompt();
+
     out.println("[게시글 등록]");
 
     Board b = new Board();
 
-    b.setTitle(Prompt.inputString("제목? "));
-    b.setContent(Prompt.inputString("내용? "));
+    b.setTitle(prompt.inputString("제목? "));
+    b.setContent(prompt.inputString("내용? "));
 
     Member writer = new Member();
-    writer.setNo(Prompt.inputInt("작성자 번호? "));
+    writer.setNo(prompt.inputInt("작성자 번호? "));
     b.setWriter(writer);
 
     boardService.add(b);

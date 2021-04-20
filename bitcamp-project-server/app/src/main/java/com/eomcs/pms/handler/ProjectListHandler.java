@@ -38,7 +38,7 @@ public class ProjectListHandler implements Command {
       }
 
       // 2) 프로젝트 정보를 출력
-      System.out.printf("%d, %s, %s, %s, %s, [%s]\n", 
+      out.printf("%d, %s, %s, %s, %s, [%s]\n", 
           p.getNo(), 
           p.getTitle(), 
           p.getStartDate(),

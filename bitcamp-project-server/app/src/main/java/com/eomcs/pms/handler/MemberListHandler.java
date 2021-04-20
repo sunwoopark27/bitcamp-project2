@@ -25,7 +25,7 @@ public class MemberListHandler implements Command {
     List<Member> list = memberService.list();
 
     for (Member m : list) {
-      System.out.printf("%d, %s, %s, %s, %s\n", 
+      out.printf("%d, %s, %s, %s, %s\n", 
           m.getNo(), 
           m.getName(), 
           m.getEmail(),
