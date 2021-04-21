@@ -2,8 +2,7 @@ package com.eomcs.pms.service.impl;
 
 import java.util.HashMap;
 import java.util.List;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
+import com.eomcs.mybatis.TransactionManager;
 import com.eomcs.pms.dao.ProjectDao;
 import com.eomcs.pms.dao.TaskDao;
 import com.eomcs.pms.domain.Member;
@@ -17,16 +16,13 @@ import com.eomcs.pms.service.ProjectService;
 //
 public class DefaultProjectService implements ProjectService {
 
-  // 서비스 객체는 트랜잭션을 제어해야 하기 때문에
-  // DAO가 사용하는 SqlSession 객체를 주입 받아야 한다.
-  SqlSessionFactory sqlSessionFactory; 
-
+  TransactionManager txManager;
   // 비즈니스 로직을 수행하는 동안 데이터 처리를 위해 사용할 DAO 를 주입 받아야 한다.
   ProjectDao projectDao;
   TaskDao taskDao;
 
-  public DefaultProjectService(SqlSessionFactory sqlSessionFactory, ProjectDao projectDao, TaskDao taskDao) {
-    this.sqlSessionFactory = sqlSessionFactory;
+  public DefaultProjectService(TransactionManager txManager, ProjectDao projectDao, TaskDao taskDao) {
+    this.txManager = txManager;
     this.projectDao = projectDao;
     this.taskDao = taskDao;
   }
@@ -34,7 +30,7 @@ public class DefaultProjectService implements ProjectService {
   // 등록 업무 
   @Override
   public int add(Project project) throws Exception {
-    SqlSession sqlSession = sqlSessionFactory.openSession(false);
+    txManager.beginTransaction();
     try {
       // 1) 프로젝트 정보를 입력한다.
       int count = projectDao.insert(project);
@@ -46,11 +42,11 @@ public class DefaultProjectService implements ProjectService {
 
       projectDao.insertMembers(params);
 
-      sqlSession.commit();
+      txManager.commit();
       return count;
 
     } catch (Exception e) {
-      sqlSession.rollback();
+      txManager.rollback();
       throw e;
     }
   }
@@ -70,7 +66,7 @@ public class DefaultProjectService implements ProjectService {
   // 변경 업무
   @Override
   public int update(Project project) throws Exception {
-    SqlSession sqlSession = sqlSessionFactory.openSession(false);
+    txManager.beginTransaction();
     try {
       int count = projectDao.update(project);
       projectDao.deleteMembers(project.getNo());
@@ -83,11 +79,11 @@ public class DefaultProjectService implements ProjectService {
 
       // 다른 스레드가 rollback 할 수 있도록 잠시 대기
       Thread.sleep(30000);
-      sqlSession.commit();
+      txManager.commit();
       return count;
 
     } catch (Exception e) {
-      sqlSession.rollback();
+      txManager.rollback();
       throw e;
     }
   }
@@ -95,7 +91,7 @@ public class DefaultProjectService implements ProjectService {
   // 삭제 업무
   @Override
   public int delete(int no) throws Exception {
-    SqlSession sqlSession = sqlSessionFactory.openSession(false);
+    txManager.beginTransaction();
     try {
       // 1) 프로젝트의 모든 작업 삭제
       taskDao.deleteByProjectNo(no);
@@ -110,11 +106,11 @@ public class DefaultProjectService implements ProjectService {
 
       // 3) 프로젝트 삭제
       int count = projectDao.delete(no);
-      sqlSession.commit();
+      txManager.commit();
       return count;
 
     } catch (Exception e) {
-      sqlSession.rollback();
+      txManager.rollback();
       throw e;
     }
   }
@@ -141,15 +137,12 @@ public class DefaultProjectService implements ProjectService {
 
   @Override
   public int deleteMembers(int projectNo) throws Exception {
-    SqlSession sqlSession = sqlSessionFactory.openSession(false);
-    int count = projectDao.deleteMembers(projectNo);
-    sqlSession.commit();
-    return count;
+    return projectDao.deleteMembers(projectNo);
   }
 
   @Override
   public int updateMembers(int projectNo, List<Member> members) throws Exception {
-    SqlSession sqlSession = sqlSessionFactory.openSession(false);
+    txManager.beginTransaction();
     try {
       projectDao.deleteMembers(projectNo);
 
@@ -158,11 +151,11 @@ public class DefaultProjectService implements ProjectService {
       params.put("members", members);
 
       int count = projectDao.insertMembers(params);
-      sqlSession.commit();
+      txManager.commit();
       return count;
 
     } catch (Exception e) {
-      sqlSession.rollback();
+      txManager.rollback();
       throw e;
     }
   }
