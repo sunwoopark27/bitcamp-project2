@@ -23,6 +23,9 @@ public class ProjectDetailHandler implements Command {
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
     Prompt prompt = request.getPrompt();
+
+    out.println("[프로젝트 상세보기]");
+
     int no = prompt.inputInt("번호? ");
 
     Project project = projectService.get(no);

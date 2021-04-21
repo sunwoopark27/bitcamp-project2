@@ -21,6 +21,7 @@ public class MemberUpdateHandler implements Command {
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
     Prompt prompt = request.getPrompt();
+
     out.println("[회원 변경]");
 
     int no = prompt.inputInt("번호? ");
@@ -28,7 +29,7 @@ public class MemberUpdateHandler implements Command {
     Member oldMember = memberService.get(no);
 
     if (oldMember == null) {
-      System.out.println("해당 번호의 회원이 없습니다.");
+      out.println("해당 번호의 회원이 없습니다.");
       return;
     }
 

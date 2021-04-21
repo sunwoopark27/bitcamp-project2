@@ -20,6 +20,7 @@ public class BoardDeleteHandler implements Command {
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
     Prompt prompt = request.getPrompt();
+
     out.println("[게시글 삭제]");
 
     int no = prompt.inputInt("번호? ");

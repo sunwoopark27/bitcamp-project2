@@ -11,7 +11,7 @@ public class HelloHandler implements Command {
   @Override
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
-    System.out.println("안녕하세요!");
+    out.println("안녕하세요!");
   }
 
 }

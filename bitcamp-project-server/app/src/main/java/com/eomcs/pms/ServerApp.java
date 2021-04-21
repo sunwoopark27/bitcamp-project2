@@ -171,7 +171,6 @@ public class ServerApp {
       // 클라이언트가 보낸 명령을 Command 구현체에게 전달하기 쉽도록 객체에 담는다.
       InetSocketAddress remoteAddr = (InetSocketAddress) clientSocket.getRemoteSocketAddress();
 
-
       // 클라이언트로부터 값을 입력 받을 때 사용할 객체를 준비한다.
       Prompt prompt = new Prompt(in, out);
 
@@ -220,7 +219,7 @@ public class ServerApp {
         CommandRequest request = new CommandRequest(
             requestLine, 
             remoteAddr.getHostString(),
-            remoteAddr.getPort(),
+            remoteAddr.getPort(), 
             prompt);
 
         CommandResponse response = new CommandResponse(out);

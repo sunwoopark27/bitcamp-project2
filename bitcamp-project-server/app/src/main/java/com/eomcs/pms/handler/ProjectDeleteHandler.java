@@ -21,7 +21,9 @@ public class ProjectDeleteHandler implements Command {
     PrintWriter out = response.getWriter();
     Prompt prompt = request.getPrompt();
 
-    int no =prompt.inputInt("번호? ");
+    out.println("[프로젝트 삭제]");
+
+    int no = prompt.inputInt("번호? ");
 
     String input = prompt.inputString("정말 삭제하시겠습니까?(y/N) ");
     if (!input.equalsIgnoreCase("Y")) {

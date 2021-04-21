@@ -23,6 +23,7 @@ public class ProjectDetailSearchHandler implements Command {
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
     Prompt prompt = request.getPrompt();
+
     out.println("[프로젝트 상세 검색]");
 
     String title = prompt.inputString("프로젝트명?(조건에서 제외: 빈 문자열) ");

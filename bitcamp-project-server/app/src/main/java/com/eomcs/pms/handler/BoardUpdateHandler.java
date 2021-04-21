@@ -11,7 +11,6 @@ import com.eomcs.util.Prompt;
 @Component("/board/update")
 public class BoardUpdateHandler implements Command {
 
-
   BoardService boardService;
 
   public BoardUpdateHandler(BoardService boardService) {
@@ -29,7 +28,7 @@ public class BoardUpdateHandler implements Command {
 
     Board oldBoard = boardService.get(no);
     if (oldBoard == null) {
-      System.out.println("해당 번호의 게시글이 없습니다.");
+      out.println("해당 번호의 게시글이 없습니다.");
       return;
     }
 

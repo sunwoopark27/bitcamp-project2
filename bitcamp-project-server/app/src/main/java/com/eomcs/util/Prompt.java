@@ -4,9 +4,6 @@ import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.sql.Date;
 
-// 패키지 소속 클래스 = top level class
-// - 공개(public) : 다른 패키지에서 사용할 수 있음.
-// - 비공개 : 같은 패키지인 경우만 사용할 수 있음.
 public class Prompt {
 
   private BufferedReader in;

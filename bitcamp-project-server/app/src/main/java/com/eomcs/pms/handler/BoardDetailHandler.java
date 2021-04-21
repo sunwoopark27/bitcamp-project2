@@ -24,13 +24,14 @@ public class BoardDetailHandler implements Command {
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
     Prompt prompt = request.getPrompt();
+
     out.println("[게시글 상세보기]");
 
     int no = prompt.inputInt("번호? ");
 
     Board b = boardService.get(no);
     if (b == null) {
-      System.out.println("해당 번호의 게시글이 없습니다.");
+      out.println("해당 번호의 게시글이 없습니다.");
       return;
     }
 

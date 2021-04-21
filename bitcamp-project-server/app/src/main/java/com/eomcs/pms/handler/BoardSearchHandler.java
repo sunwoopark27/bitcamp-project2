@@ -22,6 +22,7 @@ public class BoardSearchHandler implements Command {
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
     Prompt prompt = request.getPrompt();
+
     String keyword = prompt.inputString("검색어? ");
 
     if (keyword.length() == 0) {

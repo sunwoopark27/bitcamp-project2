@@ -7,7 +7,7 @@ import com.eomcs.util.CommandRequest;
 import com.eomcs.util.CommandResponse;
 import com.eomcs.util.Prompt;
 
-@Component(value="/member/delete")
+@Component("/member/delete")
 public class MemberDeleteHandler implements Command {
 
   MemberService memberService;
@@ -20,6 +20,7 @@ public class MemberDeleteHandler implements Command {
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
     Prompt prompt = request.getPrompt();
+
     out.println("[회원 삭제]");
 
     int no = prompt.inputInt("번호? ");

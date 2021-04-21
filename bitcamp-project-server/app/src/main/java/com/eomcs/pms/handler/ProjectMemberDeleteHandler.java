@@ -22,6 +22,7 @@ public class ProjectMemberDeleteHandler implements Command {
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
     Prompt prompt = request.getPrompt();
+
     out.println("[프로젝트 멤버 삭제]");
 
     int no = prompt.inputInt("프로젝트 번호? ");
@@ -38,7 +39,7 @@ public class ProjectMemberDeleteHandler implements Command {
     for (Member m : project.getMembers()) {
       out.printf("  %s(%d)\n", m.getName(), m.getNo());
     }
-    out.println();
+    out.println("---------------------------");
 
     String input = prompt.inputString("정말 삭제하시겠습니까?(y/N) ");
     if (!input.equalsIgnoreCase("Y")) {

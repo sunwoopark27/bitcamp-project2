@@ -23,6 +23,7 @@ public class ProjectAddHandler implements Command {
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
     Prompt prompt = request.getPrompt();
+
     out.println("[프로젝트 등록]");
 
     Project p = new Project();

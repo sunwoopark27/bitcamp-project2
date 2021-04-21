@@ -9,7 +9,7 @@ import com.eomcs.util.CommandRequest;
 import com.eomcs.util.CommandResponse;
 import com.eomcs.util.Prompt;
 
-@Component(value="/board/add")
+@Component("/board/add")
 public class BoardAddHandler implements Command {
 
   // 핸들러가 사용할 Service 객체

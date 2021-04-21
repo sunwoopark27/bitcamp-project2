@@ -97,6 +97,13 @@ public class DefaultProjectService implements ProjectService {
       // 2) 프로젝트 멤버 삭제
       projectDao.deleteMembers(no);
 
+      // 롤백하기 위해 일부러 예외 발생!
+      if (no != 1000) {
+        // 30초 후에 예외 발생 시키기 
+        Thread.sleep(30000);
+        throw new Exception ("프로젝트 삭제 중 오류 발생!");
+      }
+
       // 3) 프로젝트 삭제
       int count = projectDao.delete(no);
       sqlSession.commit();

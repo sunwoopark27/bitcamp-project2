@@ -1,7 +1,8 @@
 package com.eomcs.util;
 
-//클라이언트의 요청 정보를 다루는 역할 
+// 클라이언트의 요청 정보를 다루는 역할
 public class CommandRequest {
+
   private String commandPath;
   private String remoteAddr;
   private int remotePort;

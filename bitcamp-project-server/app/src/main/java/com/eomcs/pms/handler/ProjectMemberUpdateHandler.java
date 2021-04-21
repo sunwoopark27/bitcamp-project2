@@ -25,6 +25,7 @@ public class ProjectMemberUpdateHandler implements Command {
   public void service(CommandRequest request, CommandResponse response) throws Exception {
     PrintWriter out = response.getWriter();
     Prompt prompt = request.getPrompt();
+
     out.println("[프로젝트 멤버 변경]");
 
     int no = prompt.inputInt("프로젝트 번호? ");
@@ -41,7 +42,7 @@ public class ProjectMemberUpdateHandler implements Command {
     for (Member m : project.getMembers()) {
       out.printf("  %s(%d)\n", m.getName(), m.getNo());
     }
-    out.println();
+    out.println("---------------------------");
 
     // 프로젝트 팀원 정보를 입력 받는다.
     out.println("프로젝트의 멤버를 새로 등록하세요.");
