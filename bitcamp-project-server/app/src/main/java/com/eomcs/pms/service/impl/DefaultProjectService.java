@@ -19,7 +19,7 @@ import com.eomcs.pms.service.ProjectService;
 public class DefaultProjectService implements ProjectService {
 
   TransactionTemplate transactionTemplate;
-  // 비즈니스 로직을 수행하는 동안 데이터 처리를 위해 사용할 DAO 를 주입 받아야 한다.
+
   ProjectDao projectDao;
   TaskDao taskDao;
 
@@ -32,13 +32,12 @@ public class DefaultProjectService implements ProjectService {
   // 등록 업무 
   @Override
   public int add(Project project) throws Exception {
-
     return (int) transactionTemplate.execute(new TransactionCallback() {
       @Override
       public Object doInTransaction() throws Exception {
         // 트랜잭션으로 묶어서 실행할 작업을 기술한다.
         // 1) 프로젝트 정보를 입력한다.
-        int count = projectDao.insert(project);
+        int count = projectDao.insert(project); 
 
         // 2) 멤버를 입력한다.
         HashMap<String,Object> params = new HashMap<>();
@@ -46,11 +45,9 @@ public class DefaultProjectService implements ProjectService {
         params.put("members", project.getMembers());
 
         projectDao.insertMembers(params);
-
         return count;
       }
     });
-
   }
 
   // 조회 업무
@@ -79,6 +76,11 @@ public class DefaultProjectService implements ProjectService {
         params.put("members", project.getMembers());
 
         projectDao.insertMembers(params);
+
+        // 다른 스레드가 작업할 시간을 준다.
+        // => 즉 다른 스레드가 현재 스레드의 트랜잭션 작업을 간섭할 수 있는지 확인하기 위함이다.
+        //        Thread.sleep(30000);
+
         return count;
       }
     });
@@ -87,21 +89,25 @@ public class DefaultProjectService implements ProjectService {
   // 삭제 업무
   @Override
   public int delete(int no) throws Exception {
-
     return (int) transactionTemplate.execute(new TransactionCallback() {
       @Override
       public Object doInTransaction() throws Exception {
-        // 트랜잭션으로 묵어서 실행할 작업 기술 
+        // 트랜잭션으로 묶어서 실행할 작업을 기술한다.
         // 1) 프로젝트의 모든 작업 삭제
         taskDao.deleteByProjectNo(no);
 
         // 2) 프로젝트 멤버 삭제
         projectDao.deleteMembers(no);
 
+        //        if ("test".length() == 4) {
+        //          // 현재 스레드의 트랜잭션 rollback()이 다른 스레드의 트랜잭션에 영향을 끼치는지 확인한다.
+        //          throw new Exception("일부러 예외 발생!"); 
+        //        }
+
         // 3) 프로젝트 삭제
-        return projectDao.delete(no);
+        return  projectDao.delete(no);
       }
-    }); 
+    });
   }
 
   // 찾기

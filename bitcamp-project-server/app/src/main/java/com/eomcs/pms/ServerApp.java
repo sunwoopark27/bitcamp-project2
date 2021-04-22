@@ -41,6 +41,7 @@ import com.eomcs.stereotype.Component;
 import com.eomcs.util.CommandRequest;
 import com.eomcs.util.CommandResponse;
 import com.eomcs.util.Prompt;
+import com.eomcs.util.Session;
 
 public class ServerApp {
 
@@ -85,7 +86,7 @@ public class ServerApp {
     SqlSessionFactoryProxy sqlSessionFactoryProxy = new SqlSessionFactoryProxy(sqlSessionFactory);
 
     // 2) DAO 구현체를 자동으로 만들어주는 공장 객체를 준비한다.
-    // => 오리지널 SqlSessionFactory 대신에 트랜잭션 상테에 따라 SqlSession 객체를 만들어주는
+    // => 오리지널 SqlSessionFactory 대신에 트랜잭션 상태에 따라 SqlSession 객체를 만들어주는
     //    SqlSessionFactory 대행자를 주입한다.
     MybatisDaoFactory daoFactory = new MybatisDaoFactory(sqlSessionFactoryProxy);
 
@@ -101,7 +102,7 @@ public class ServerApp {
 
     // 4) Command 구현체가 사용할 의존 객체(서비스 객체 + 도우미 객체) 준비
     // => 서비스 객체 생성
-    // => 기존에 주입하던 SqlSessionFactory 대신 TransactionManager를 주입한다.
+    // => 기존에 주입하던 SqlSessionFactory 대신 TransactionManager를 주입한다. 
     BoardService boardService = new DefaultBoardService(boardDao);
     MemberService memberService = new DefaultMemberService(memberDao);
     ProjectService projectService = new DefaultProjectService(txManager, projectDao, taskDao);
@@ -181,65 +182,63 @@ public class ServerApp {
       // 클라이언트로부터 값을 입력 받을 때 사용할 객체를 준비한다.
       Prompt prompt = new Prompt(in, out);
 
+      // 클라이언트가 접속해 있는 동안 사용할 저장소를 준비한다.
+      Session session = new Session();
+
+      // 클라이언트가 보낸 요청을 읽는다.
+      String requestLine = in.readLine();
+
+      // 클라이언트가 보낸 나머지 데이터를 읽는다.
       while (true) {
-        // 클라이언트가 보낸 요청을 읽는다.
-        String requestLine = in.readLine();
-
-        // 클라이언트가 보낸 나머지 데이터를 읽는다.
-        while (true) {
-          String line = in.readLine();
-          if (line.length() == 0) {
-            break;
-          }
-          // 지금은 '요청 명령' 과 '빈 줄' 사이에 존재하는 데이터는 무시한다.
+        String line = in.readLine();
+        if (line.length() == 0) {
+          break;
         }
+        // 지금은 '요청 명령' 과 '빈 줄' 사이에 존재하는 데이터는 무시한다.
+      }
 
-        // 클라이언트 요청에 대해 기록(log)을 남긴다.
-        System.out.printf("[%s:%d] %s\n", 
-            remoteAddr.getHostString(), remoteAddr.getPort(), requestLine);
+      // 클라이언트 요청에 대해 기록(log)을 남긴다.
+      System.out.printf("[%s:%d] %s\n", 
+          remoteAddr.getHostString(), remoteAddr.getPort(), requestLine);
 
 
-        if (requestLine.equalsIgnoreCase("serverstop")) {
-          out.println("Server stopped!");
-          out.println();
-          out.flush();
-          terminate();
-          return; 
-        }
-
-        if (requestLine.equalsIgnoreCase("exit") || requestLine.equalsIgnoreCase("quit")) {
-          out.println("Goodbye!");
-          out.println();
-          out.flush();
-          return;
-        }
-
-        // 클라이언트의 요청을 처리할 Command 구현체를 찾는다.
-        Command command = (Command) objMap.get(requestLine);
-        if (command == null) {
-          out.println("해당 명령을 처리할 수 없습니다!");
-          out.println();
-          out.flush();
-          continue;
-        }
-
-        CommandRequest request = new CommandRequest(
-            requestLine, 
-            remoteAddr.getHostString(),
-            remoteAddr.getPort(), 
-            prompt);
-
-        CommandResponse response = new CommandResponse(out);
-
-        // Command 구현체를 실행한다.
-        try {
-          command.service(request, response);
-        } catch (Exception e) {
-          out.println("서버 오류 발생!");
-          e.printStackTrace();
-        }
+      if (requestLine.equalsIgnoreCase("serverstop")) {
+        out.println("Server stopped!");
         out.println();
         out.flush();
+        terminate();
+        return; 
+      }
+
+      // 클라이언트의 요청을 처리할 Command 구현체를 찾는다.
+      Command command = (Command) objMap.get(requestLine);
+      if (command == null) {
+        out.println("해당 명령을 처리할 수 없습니다!");
+        out.println();
+        out.flush();
+        return;
+      }
+
+      CommandRequest request = new CommandRequest(
+          requestLine, 
+          remoteAddr.getHostString(),
+          remoteAddr.getPort(), 
+          prompt,
+          session);
+
+      CommandResponse response = new CommandResponse(out);
+
+      // Command 구현체를 실행한다.
+      try {
+        command.service(request, response);
+        out.println();
+        out.flush();
+
+      } catch (Exception e) {
+        out.println("서버 오류 발생!");
+        out.println();
+        out.flush();
+        throw e;
       }
 
     } catch (Exception e) {

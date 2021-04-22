@@ -1,6 +1,8 @@
 package com.eomcs.pms.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.eomcs.pms.dao.MemberDao;
 import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.service.MemberService;
@@ -31,6 +33,16 @@ public class DefaultMemberService implements MemberService {
     return memberDao.findByNo(no);
   }
 
+  // 사용자 조회 업무
+  @Override
+  public Member get(String email, String password) throws Exception {
+    Map<String,Object> params = new HashMap<>();
+    params.put("email", email);
+    params.put("password", password);
+
+    return memberDao.findByEmailPassword(params);
+  }
+
   // 변경 업무
   @Override
   public int update(Member member) throws Exception {
@@ -47,12 +59,6 @@ public class DefaultMemberService implements MemberService {
   @Override
   public Member search(String name) throws Exception {
     return memberDao.findByName(name);
-  }
-
-  @Override
-  public Member get(String email, String password) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
   }
 }
 
