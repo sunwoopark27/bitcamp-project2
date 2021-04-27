@@ -13,6 +13,12 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8';
 }
 
+war {
+
+  archiveBaseName = "pms"
+
+}
+
 repositories {
     jcenter()
 }
