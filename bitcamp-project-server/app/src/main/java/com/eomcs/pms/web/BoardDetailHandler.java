@@ -58,19 +58,18 @@ public class BoardDetailHandler extends HttpServlet {
       out.printf("<tr><th>조회수</th> <td>%s</td></tr>\n", b.getViewCount());
       out.printf("<tr><th>좋아요</th> <td>%s</td></tr>\n", b.getLike());
       out.println("</tbody>");
-      out.println("<tfoot>");
-      out.println("<tr><td colspan='2'>");
 
       Member loginUser = (Member) request.getSession().getAttribute("loginUser");
-      if (b.getWriter().getNo() == loginUser.getNo()) {
+      if (loginUser != null && b.getWriter().getNo() == loginUser.getNo()) {
 
+        out.println("<tfoot>");
+        out.println("<tr><td colspan='2'>");
         out.println("<input type='submit' value='변경'>"
             + "<a href='delete?no=" + b.getNo() + "'> 삭제</a> ");
+        out.println("</td></tr>");
+        out.println("</tfoot>");
       }
-      out.println("<a href='list'>목록</a>");
 
-      out.println("</td></tr>");
-      out.println("</tfoot>");
       out.println("<table>");
       out.printf("</form>");
     } catch (Exception e) {
