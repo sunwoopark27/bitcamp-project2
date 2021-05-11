@@ -12,14 +12,14 @@ import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.service.MemberService;
 
 @SuppressWarnings("serial")
-@WebServlet("/login") // servlet path
+@WebServlet("/login")
 public class LoginHandler extends HttpServlet {
 
   // Servlet 인터페이스의 오리지널 메서드를 재정의 하는 대신에
   // HttpServlet 클래스에서 추가한 service() 메서드를 재정의한다.
-  // => 톰캣 서버
-  //        호출 ---> service(ServletRequest,ServletResponse)
-  //                   호출 ----> service(HttpServletRequest, HttpServletResponse)
+  // => 톰캣 서버 
+  //       호출 ----> service(ServletRequest, ServletResponse)
+  //                    호출 ----> service(HttpServletRequest, HttpServletResponse)
   @Override
   protected void service(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
@@ -39,7 +39,7 @@ public class LoginHandler extends HttpServlet {
       if (member == null) {
         out.println("사용자 정보가 맞지 않습니다.");
         // 로그인 실패한다면 세션 객체의 모든 내용을 삭제한다.
-        request.getSession().invalidate(); // 
+        request.getSession().invalidate();  
         return;
       }
 
