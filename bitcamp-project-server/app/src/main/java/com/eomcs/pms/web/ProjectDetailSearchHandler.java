@@ -21,16 +21,18 @@ public class ProjectDetailSearchHandler extends HttpServlet {
   protected void service(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
-    response.setContentType("text/plain;charset=UTF-8");
     ProjectService projectService = (ProjectService) request.getServletContext().getAttribute("projectService");
 
+    response.setContentType("text/plain;charset=UTF-8");
     PrintWriter out = response.getWriter();
+
     out.println("[프로젝트 상세 검색]");
 
-    String title = request.getParameter("title");
-    String owner = request.getParameter("owner");
-    String member = request.getParameter("member");
     try {
+      String title = request.getParameter("title");
+      String owner = request.getParameter("owner");
+      String member = request.getParameter("member");
+
       List<Project> projects = projectService.search(title, owner, member);
 
       for (Project p : projects) {
@@ -54,6 +56,7 @@ public class ProjectDetailSearchHandler extends HttpServlet {
             p.getOwner().getName(),
             strBuilder.toString());
       }
+
     } catch (Exception e) {
       StringWriter strWriter = new StringWriter();
       PrintWriter printWriter = new PrintWriter(strWriter);

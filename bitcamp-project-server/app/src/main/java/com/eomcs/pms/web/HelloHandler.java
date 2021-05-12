@@ -31,11 +31,12 @@ public class HelloHandler implements Servlet {
   }
 
   @Override
-  public void service(ServletRequest req, ServletResponse response)
+  public void service(ServletRequest request, ServletResponse response)
       throws ServletException, IOException {
     PrintWriter out = response.getWriter();
     out.println("안녕하세요!");
     out.println("Hello!");
+
   }
 
 }

@@ -12,8 +12,8 @@ import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.domain.Project;
 import com.eomcs.pms.service.ProjectService;
 
-@WebServlet("/project/delete")
 @SuppressWarnings("serial")
+@WebServlet("/project/delete")
 public class ProjectDeleteHandler extends HttpServlet {
 
   @Override
@@ -30,12 +30,6 @@ public class ProjectDeleteHandler extends HttpServlet {
     out.println("<head>");
     out.println("<title>프로젝트 삭제</title>");
 
-    Member loginUser = (Member) request.getSession().getAttribute("loginUser");
-    if (loginUser == null) {
-      out.println("로그인 하지 않았습니다!");
-      return;
-    }
-
     try {
       int no = Integer.parseInt(request.getParameter("no"));
 
@@ -45,17 +39,19 @@ public class ProjectDeleteHandler extends HttpServlet {
         throw new Exception("해당 번호의 게시글이 없습니다.");
       }
 
-      loginUser = (Member) request.getSession().getAttribute("loginUser");
+      Member loginUser = (Member) request.getSession().getAttribute("loginUser");
       if (oldProject.getOwner().getNo() != loginUser.getNo()) {
         throw new Exception("삭제 권한이 없습니다!");
       }
 
       projectService.delete(no);
+
       out.println("<meta http-equiv='Refresh' content='1;url=list'>");
       out.println("</head>");
       out.println("<body>");
       out.println("<h1>프로젝트 삭제</h1>");
       out.println("<p>프로젝트를 삭제하였습니다.</p>");
+
     } catch (Exception e) {
       StringWriter strWriter = new StringWriter();
       PrintWriter printWriter = new PrintWriter(strWriter);
@@ -64,9 +60,11 @@ public class ProjectDeleteHandler extends HttpServlet {
       out.println("</head>");
       out.println("<body>");
       out.println("<h1>프로젝트 삭제 오류</h1>");
+      out.printf("<p>%s</p>\n", e.getMessage());
       out.printf("<pre>%s</pre>\n", strWriter.toString());
-      out.println("<a href='list'>목록</a></p>\n");
+      out.println("<p><a href='list'>목록</a></p>");
     }
+
     out.println("</body>");
     out.println("</html>");
   }

@@ -21,8 +21,8 @@ public class BoardSearchHandler extends HttpServlet {
       throws ServletException, IOException {
 
     String keyword = request.getParameter("keyword");
-    response.setContentType("text/html;charset=UTF-8");
 
+    response.setContentType("text/html;charset=UTF-8");
     PrintWriter out = response.getWriter();
 
     out.println("<!DOCTYPE html>");
@@ -31,10 +31,10 @@ public class BoardSearchHandler extends HttpServlet {
     out.println("<title>게시글 검색</title>");
     out.println("</head>");
     out.println("<body>");
-    out.printf("<h1>게시글 검색 결과 : %s</h1>", keyword);
+    out.printf("<h1>게시글 검색 결과 : %s</h1>\n", keyword);
 
     try {
-      if (keyword == null ||keyword.length() == 0) {
+      if (keyword == null || keyword.length() == 0) {
         throw new SearchException("검색어를 입력하세요.");
       }
 
@@ -58,7 +58,7 @@ public class BoardSearchHandler extends HttpServlet {
             + " <td><a href='detail?no=%1$d'>%s</a></td>"
             + " <td>%s</td>"
             + " <td>%s</td>"
-            + " <td>%d<td> </tr>\n", 
+            + " <td>%d</td> </tr>\n", 
             b.getNo(), 
             b.getTitle(), 
             b.getWriter().getName(),
@@ -66,7 +66,7 @@ public class BoardSearchHandler extends HttpServlet {
             b.getViewCount());
       }
       out.println("</tbody>");
-      out.println("<table>");
+      out.println("</table>");
 
     } catch (SearchException e) {
       out.printf("<p>%s</p>\n", e.getMessage());
@@ -78,6 +78,7 @@ public class BoardSearchHandler extends HttpServlet {
 
       out.printf("<pre>%s</pre>\n", strWriter.toString());
     }
+
     out.println("</body>");
     out.println("</html>");
   }

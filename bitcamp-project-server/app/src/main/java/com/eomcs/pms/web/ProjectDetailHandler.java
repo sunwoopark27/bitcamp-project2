@@ -14,8 +14,8 @@ import com.eomcs.pms.domain.Project;
 import com.eomcs.pms.service.MemberService;
 import com.eomcs.pms.service.ProjectService;
 
-@WebServlet("/project/detail")
 @SuppressWarnings("serial")
+@WebServlet("/project/detail")
 public class ProjectDetailHandler extends HttpServlet {
 
   @Override
@@ -25,7 +25,6 @@ public class ProjectDetailHandler extends HttpServlet {
     ProjectService projectService = (ProjectService) request.getServletContext().getAttribute("projectService");
 
     response.setContentType("text/html;charset=UTF-8");
-
     PrintWriter out = response.getWriter();
 
     out.println("<!DOCTYPE html>");
@@ -47,7 +46,7 @@ public class ProjectDetailHandler extends HttpServlet {
         return;
       }
 
-      out.println("<form action='update' method='POST'>");
+      out.println("<form action='update' method='post'>");
       out.printf("번호: <input type='text' name='no' value='%d' readonly><br>\n", project.getNo());
       out.printf("제목: <input type='text' name='title' value='%s'><br>\n", project.getTitle());
       out.printf("내용: <textarea name='content' rows='10' cols='60'>%s</textarea><br>\n", project.getContent());
@@ -57,13 +56,13 @@ public class ProjectDetailHandler extends HttpServlet {
       out.println("팀원: <br>");
 
       MemberService memberService = (MemberService) request.getServletContext().getAttribute("memberService");
-      List<Member> members = memberService.list();
+      List<Member> members = memberService.list(null);
       for (Member m : members) {
-
-        out.printf("  <input type = 'checkbox' name='member' value='%d' %s>%s<br>\n",
-            m.getNo(), contain(project.getMembers(), m.getNo()) ? "checked": "", m.getName());
+        out.printf("  <input type='checkbox' name='member' value='%d' %s>%s<br>\n", 
+            m.getNo(), contain(project.getMembers(), m.getNo()) ? "checked" : "", m.getName());
       }
-      out.println("<input type='submit' value='변경'>");
+
+      out.println("<input type='submit' value='변경'> ");
       out.printf("<a href='delete?no=%d'>삭제</a>\n", project.getNo());
       out.println("</form>");
 
@@ -73,7 +72,7 @@ public class ProjectDetailHandler extends HttpServlet {
       e.printStackTrace(printWriter);
       out.printf("<pre>%s</pre>\n", strWriter.toString());
     }
-    out.println("<a href='list'>목록</a></p>\n");
+    out.println("<p><a href='list'>목록</a></p>");
 
     out.println("</body>");
     out.println("</html>");
@@ -87,7 +86,6 @@ public class ProjectDetailHandler extends HttpServlet {
     }
     return false;
   }
-
 }
 
 

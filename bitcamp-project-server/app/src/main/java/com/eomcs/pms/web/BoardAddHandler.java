@@ -24,15 +24,12 @@ public class BoardAddHandler extends HttpServlet {
 
     Board b = new Board();
 
-    // 클라이언트가 POST 요청으로 보낸 데이터가 UTF-8임을 알려준다.
-    request.setCharacterEncoding("UTF-8");
-
     b.setTitle(request.getParameter("title"));
     b.setContent(request.getParameter("content"));
 
-    HttpServletRequest httpRequest= request;
-    Member loginUser = (Member) httpRequest.getSession().getAttribute("loginUser");
     // 작성자는 로그인 사용자이다.
+    HttpServletRequest httpRequest = request;
+    Member loginUser = (Member) httpRequest.getSession().getAttribute("loginUser");
     b.setWriter(loginUser);
 
     response.setContentType("text/html;charset=UTF-8");
@@ -43,8 +40,6 @@ public class BoardAddHandler extends HttpServlet {
     out.println("<head>");
     out.println("<title>게시글 등록</title>");
 
-    out.println("[게시글 등록]");
-
     try {
       boardService.add(b);
 
@@ -52,10 +47,9 @@ public class BoardAddHandler extends HttpServlet {
       out.println("</head>");
       out.println("<body>");
       out.println("<h1>게시글 등록</h1>");
-      out.println("<p>게시글을 등록했습니다.<p>");
+      out.println("<p>게시글을 등록했습니다.</p>");
 
     } catch (Exception e) {
-      // 상세 오류 내용을 StringWriter로 출력한다.
       StringWriter strWriter = new StringWriter();
       PrintWriter printWriter = new PrintWriter(strWriter);
       e.printStackTrace(printWriter);
@@ -64,7 +58,7 @@ public class BoardAddHandler extends HttpServlet {
       out.println("<body>");
       out.println("<h1>게시글 등록 오류</h1>");
       out.printf("<pre>%s</pre>\n", strWriter.toString());
-      out.println("<a href='list'>목록</a></p>\n");
+      out.println("<p><a href='list'>목록</a></p>");
     }
 
     out.println("</body>");

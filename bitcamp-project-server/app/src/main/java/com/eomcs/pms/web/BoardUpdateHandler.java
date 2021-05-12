@@ -19,10 +19,9 @@ public class BoardUpdateHandler extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-
     BoardService boardService = (BoardService) request.getServletContext().getAttribute("boardService");
-    response.setContentType("text/html;charset=UTF-8");
 
+    response.setContentType("text/html;charset=UTF-8");
     PrintWriter out = response.getWriter();
 
     out.println("<!DOCTYPE html>");
@@ -31,13 +30,13 @@ public class BoardUpdateHandler extends HttpServlet {
     out.println("<title>게시글 변경</title>");
 
     try {
-      request.setCharacterEncoding("UTF-8");
       int no = Integer.parseInt(request.getParameter("no"));
 
       Board oldBoard = boardService.get(no);
       if (oldBoard == null) {
-        throw new Exception ("해당 번호의 게시글이 없습니다.");
-      }
+        throw new Exception("해당 번호의 게시글이 없습니다.");
+      } 
+
       Member loginUser = (Member) request.getSession().getAttribute("loginUser");
       if (oldBoard.getWriter().getNo() != loginUser.getNo()) {
         throw new Exception("변경 권한이 없습니다!");
@@ -63,13 +62,14 @@ public class BoardUpdateHandler extends HttpServlet {
       out.println("</head>");
       out.println("<body>");
       out.println("<h1>게시글 변경 오류</h1>");
-      out.printf("<p>%s</p>\n",e.getMessage());
+      out.printf("<p>%s</p>\n", e.getMessage());
       out.printf("<pre>%s</pre>\n", strWriter.toString());
-      out.println("<a href='list'>목록</a></p>\n");
+      out.println("<p><a href='list'>목록</a></p>");
     }
 
     out.println("</body>");
     out.println("</html>");
+
   }
 }
 

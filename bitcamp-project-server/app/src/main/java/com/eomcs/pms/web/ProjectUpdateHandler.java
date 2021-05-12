@@ -24,8 +24,6 @@ public class ProjectUpdateHandler extends HttpServlet {
 
     ProjectService projectService = (ProjectService) request.getServletContext().getAttribute("projectService");
 
-    request.setCharacterEncoding("UTF-8");
-
     response.setContentType("text/html;charset=UTF-8");
     PrintWriter out = response.getWriter();
 
@@ -34,14 +32,14 @@ public class ProjectUpdateHandler extends HttpServlet {
     out.println("<head>");
     out.println("<title>프로젝트 변경</title>");
 
-    int no = Integer.parseInt(request.getParameter("no"));
     try {
+      int no = Integer.parseInt(request.getParameter("no"));
+
       Project oldProject = projectService.get(no);
 
       if (oldProject == null) {
-        throw new Exception("해당번호의 프로젝트가 없습니다.");
-
-      }
+        throw new Exception("해당 번호의 프로젝트가 없습니다.");
+      } 
 
       Member loginUser = (Member) request.getSession().getAttribute("loginUser");
       if (oldProject.getOwner().getNo() != loginUser.getNo()) {
@@ -57,25 +55,27 @@ public class ProjectUpdateHandler extends HttpServlet {
       project.setEndDate(Date.valueOf(request.getParameter("endDate")));
       project.setOwner(loginUser);
 
+      // ...&member=1&member=18&member=23
+      String[] values = request.getParameterValues("member");
+      ArrayList<Member> memberList = new ArrayList<>();
+      if (values != null) {
+        for (String value : values) {
+          Member member = new Member();
+          member.setNo(Integer.parseInt(value));
+          memberList.add(member);
+        }
+      }
+      project.setMembers(memberList);
+
+      // DBMS에게 프로젝트 변경을 요청한다.
+      projectService.update(project);
+
       out.println("<meta http-equiv='Refresh' content='1;url=list'>");
       out.println("</head>");
       out.println("<body>");
       out.println("<h1>프로젝트 변경</h1>");
       out.println("<p>프로젝트를 변경하였습니다.</p>");
 
-      // 프로젝트 팀원 정보를 입력 받는다.
-      String[] values = request.getParameterValues("member");
-      ArrayList<Member> memberList = new ArrayList<>();
-      for (String value : values) {
-        Member member = new Member();
-        member.setNo(Integer.parseInt(value));
-        memberList.add(member);
-      }
-      project.setMembers(memberList);
-
-      // DBMS에게 프로젝트 변경을 요청한다.
-      projectService.update(project);
-      out.println("프로젝트을 변경하였습니다.");
     } catch (Exception e) {
       StringWriter strWriter = new StringWriter();
       PrintWriter printWriter = new PrintWriter(strWriter);
@@ -83,11 +83,12 @@ public class ProjectUpdateHandler extends HttpServlet {
 
       out.println("</head>");
       out.println("<body>");
-      out.println("<h1>게시글 변경 오류</h1>");
-      out.printf("<p>%s</p>\n",e.getMessage());
+      out.println("<h1>프로젝트 변경 오류</h1>");
+      out.printf("<p>%s</p>\n", e.getMessage());
       out.printf("<pre>%s</pre>\n", strWriter.toString());
-      out.println("<a href='list'>목록</a></p>\n");
+      out.println("<p><a href='list'>목록</a></p>");
     }
+
     out.println("</body>");
     out.println("</html>");
   }

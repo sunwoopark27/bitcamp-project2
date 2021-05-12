@@ -37,21 +37,23 @@ public class ProjectAddHandler extends HttpServlet {
     out.println("</head>");
     out.println("<body>");
     out.println("<h1>새 프로젝트</h1>");
-    out.println("<form action='add' method='POST'>");
+    out.println("<form action='add' method='post'>");
     out.println("제목: <input type='text' name='title'><br>");
     out.println("내용: <textarea name='content' rows='10' cols='60'></textarea><br>");
     out.println("시작일: <input type='date' name='startDate'><br>");
     out.println("종료일: <input type='date' name='endDate'><br>");
     out.println("팀원: <br>");
     try {
-      List<Member> members = memberService.list();
+      List<Member> members = memberService.list(null);
       for (Member m : members) {
-        out.printf("  <input type = 'checkbox' name='member' value='%d'>%s<br>\n", m.getNo(), m.getName());
+        out.printf("  <input type='checkbox' name='member' value='%d'>%s<br>\n", m.getNo(), m.getName());
       }
     } catch (Exception e) {
       throw new ServletException(e);
     }
-    out.println("<input type='submit' value='등록'>");
+    out.println("<p><input type='submit' value='등록'>");
+    out.println("<a href='list'>목록</a></p>");
+
     out.println("</form>");
     out.println("</body>");
     out.println("</html>");
@@ -62,8 +64,6 @@ public class ProjectAddHandler extends HttpServlet {
       throws ServletException, IOException {
 
     ProjectService projectService = (ProjectService) request.getServletContext().getAttribute("projectService");
-
-    request.setCharacterEncoding("UTF-8");
 
     response.setContentType("text/html;charset=UTF-8");
     PrintWriter out = response.getWriter();
@@ -79,17 +79,20 @@ public class ProjectAddHandler extends HttpServlet {
       p.setContent(request.getParameter("content"));
       p.setStartDate(Date.valueOf(request.getParameter("startDate")));
       p.setEndDate(Date.valueOf(request.getParameter("endDate")));
+
       Member loginUser = (Member) request.getSession().getAttribute("loginUser");
       p.setOwner(loginUser);
+
       // ...&member=1&member=18&member=23
       String[] values = request.getParameterValues("member");
       ArrayList<Member> memberList = new ArrayList<>();
-      for (String value : values) {
-        Member member = new Member();
-        member.setNo(Integer.parseInt(value));
-        memberList.add(member);
+      if (values != null) {
+        for (String value : values) {
+          Member member = new Member();
+          member.setNo(Integer.parseInt(value));
+          memberList.add(member);
+        }
       }
-
       p.setMembers(memberList);
 
       projectService.add(p);
@@ -97,8 +100,8 @@ public class ProjectAddHandler extends HttpServlet {
       out.println("<meta http-equiv='Refresh' content='1;url=list'>");
       out.println("</head>");
       out.println("<body>");
-      out.println("<h1>게시글 등록</h1>");
-      out.println("<p>프로젝트를 등록했습니다.<p>");
+      out.println("<h1>프로젝트 등록</h1>");
+      out.println("<p>프로젝트를 등록했습니다.</p>");
 
     } catch (Exception e) {
       StringWriter strWriter = new StringWriter();
@@ -109,7 +112,7 @@ public class ProjectAddHandler extends HttpServlet {
       out.println("<body>");
       out.println("<h1>프로젝트 등록 오류</h1>");
       out.printf("<pre>%s</pre>\n", strWriter.toString());
-      out.println("<a href='list'>목록</a></p>\n");
+      out.println("<p><a href='list'>목록</a></p>");
     }
 
     out.println("</body>");

@@ -7,12 +7,9 @@ public class SearchException extends RuntimeException {
 
   public SearchException() {
     super();
-    // TODO Auto-generated constructor stub
   }
 
   public SearchException(String message) {
     super(message);
-    // TODO Auto-generated constructor stub
   }
-
 }
