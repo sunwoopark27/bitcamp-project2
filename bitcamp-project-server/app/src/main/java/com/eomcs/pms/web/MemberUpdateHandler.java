@@ -42,6 +42,9 @@ public class MemberUpdateHandler extends HttpServlet {
     out.println("<html>");
     out.println("<head>");
     out.println("<title>회원 변경</title>");
+    out.println("</head>");
+    out.println("<body>");
+    out.println("<h1>회원 변경</h1>");
 
 
     try {
@@ -97,12 +100,9 @@ public class MemberUpdateHandler extends HttpServlet {
       }
 
       memberService.update(member);
-
-      out.println("<meta http-equiv='Refresh' content='1;url=list'>");
-      out.println("</head>");
-      out.println("<body>");
-      out.println("<h1>회원 변경</h1>");
       out.println("<p>회원을 변경했습니다.</p>");
+
+      response.setHeader("Refresh", "1;url=list");
 
     } catch (Exception e) {
       StringWriter strWriter = new StringWriter();

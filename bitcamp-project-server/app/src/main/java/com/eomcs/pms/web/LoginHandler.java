@@ -72,11 +72,12 @@ public class LoginHandler extends HttpServlet {
       if (member == null) {
         // 로그인 실패한다면 세션 객체의 모든 내용을 삭제한다.
         request.getSession().invalidate(); 
-        out.println("<meta http-equiv='Refresh' content='1;url=login'>");
         out.println("</head>");
         out.println("<body>");
         out.println("<h1>로그인 결과</h1>");
         out.println("<p>사용자 정보가 맞지 않습니다.</p>");
+
+        response.sendRedirect("login");
 
       } else {
         // 로그인 성공한다면, 로그인 사용자 정보를 세션 객체에 보관한다.
@@ -87,6 +88,8 @@ public class LoginHandler extends HttpServlet {
         out.println("<body>");
         out.println("<h1>로그인 결과</h1>");
         out.printf("<p>%s 님 환영합니다.</p>\n", member.getName());
+
+        response.sendRedirect("userInfo");
       }
 
 
