@@ -21,7 +21,7 @@ public class ProjectMemberListHandler extends HttpServlet {
 
   @SuppressWarnings({"unused", "unchecked"})
   @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
+  protected void service(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
     MemberService memberService = (MemberService) request.getServletContext().getAttribute("memberService");
