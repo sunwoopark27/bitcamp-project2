@@ -2,7 +2,6 @@ package com.eomcs.pms.web;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +48,9 @@ public class ProjectAddHandler extends HttpServlet {
         out.printf("  <input type='checkbox' name='member' value='%d'>%s<br>\n", m.getNo(), m.getName());
       }
     } catch (Exception e) {
-      throw new ServletException(e);
+      request.setAttribute("exception",e);
+      request.getRequestDispatcher("/error").forward(request, response);
+      return;
     }
     out.println("<p><input type='submit' value='등록'>");
     out.println("<a href='list'>목록</a></p>");
@@ -64,14 +65,6 @@ public class ProjectAddHandler extends HttpServlet {
       throws ServletException, IOException {
 
     ProjectService projectService = (ProjectService) request.getServletContext().getAttribute("projectService");
-
-    response.setContentType("text/html;charset=UTF-8");
-    PrintWriter out = response.getWriter();
-
-    out.println("<!DOCTYPE html>");
-    out.println("<html>");
-    out.println("<head>");
-    out.println("<title>프로젝트 등록</title>");
 
     try {
       Project p = new Project();
@@ -97,26 +90,13 @@ public class ProjectAddHandler extends HttpServlet {
 
       projectService.add(p);
 
-      out.println("<meta http-equiv='Refresh' content='1;url=list'>");
-      out.println("</head>");
-      out.println("<body>");
-      out.println("<h1>프로젝트 등록</h1>");
-      out.println("<p>프로젝트를 등록했습니다.</p>");
+      response.sendRedirect("list");
 
     } catch (Exception e) {
-      StringWriter strWriter = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(strWriter);
-      e.printStackTrace(printWriter);
-
-      out.println("</head>");
-      out.println("<body>");
-      out.println("<h1>프로젝트 등록 오류</h1>");
-      out.printf("<pre>%s</pre>\n", strWriter.toString());
-      out.println("<p><a href='list'>목록</a></p>");
+      request.setAttribute("exception",e);
+      request.getRequestDispatcher("/error").forward(request, response);
+      return;
     }
-
-    out.println("</body>");
-    out.println("</html>");
   }
 }
 

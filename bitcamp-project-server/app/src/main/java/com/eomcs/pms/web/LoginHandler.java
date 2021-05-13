@@ -2,7 +2,6 @@ package com.eomcs.pms.web;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -79,11 +78,26 @@ public class LoginHandler extends HttpServlet {
 
         response.sendRedirect("login");
 
+        //        HTTP/1.1 302 
+        //        Set-Cookie: JSESSIONID=B013592181013C18D8AF39EA27D74B83; Path=/pms; HttpOnly
+        //        Location: login
+        //        Content-Type: text/html;charset=UTF-8
+        //        Content-Length: 0
+        //        Date: Wed, 12 May 2021 07:40:32 GMT
+        //        Keep-Alive: timeout=20
+        //        Proxy-Connection: keep-alive
+
+        // 로그인을 요청한 후 응답 결과를 보면 위와 같다. 
+        // 여기서 주목해야 할 사항은 응답에 println() 으로 출력한 결과가 없다는 것이다.
+        // 왜?
+        // - sendRedirect()를 호출하면 버퍼에 들어 있는 출력 내용을 버린다.
+        // - 응답할 때 콘텐트를 보내기 않기 때문이다.
+        // - 따라서 리다이렉트를 할 생각이라면 콘텐트를 출력하지 말라!!!
+
       } else {
         // 로그인 성공한다면, 로그인 사용자 정보를 세션 객체에 보관한다.
         request.getSession().setAttribute("loginUser", member);      
 
-        out.println("<meta http-equiv='Refresh' content='1;url=userInfo'>");
         out.println("</head>");
         out.println("<body>");
         out.println("<h1>로그인 결과</h1>");
@@ -94,14 +108,9 @@ public class LoginHandler extends HttpServlet {
 
 
     } catch (Exception e) {
-      StringWriter strWriter = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(strWriter);
-      e.printStackTrace(printWriter);
-
-      out.println("</head>");
-      out.println("<body>");
-      out.println("<h1>로그인 오류</h1>");
-      out.printf("<pre>%s</pre>\n", strWriter.toString());
+      request.setAttribute("exception",e);
+      request.getRequestDispatcher("/error").forward(request, response);
+      return;
     }
 
     out.println("</body>");
