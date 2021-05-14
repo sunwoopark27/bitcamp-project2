@@ -50,7 +50,17 @@ public class ErrorHandler extends HttpServlet {
       out.printf("<p>%s</p>", message);
     }
 
-    Exception e = (Exception) request.getAttribute("exception");
+    // web.xml에 예외처리를 설정한 경우,
+    // 그 예외 객체는 서블릿 명세에 따라 정해진 이름으로 꺼내야한다.
+    // 속성 이름과 의미:
+    // - javax.servlet.error.status_code : 에러 상태 코드
+    // - javax.servlet.error.exception_type : 예외 클래스
+    // - javax.servlet.error.message : 오류 메세지 
+    // - javax.servlet.error.request_uri : 예외가 발생한 URI
+    // - javax_servlet.error.exception : 예외 객체 
+    // - javax.servlet.error.servlet_name : 예외가 발생한 서블릿 이름
+
+    Exception e = (Exception) request.getAttribute("javax.servlet.error.exception");
     if( e!= null) {
       // 예외 객체에 간단한 메세지가 있다면 출력한다.
       if (e.getMessage() != null) {
