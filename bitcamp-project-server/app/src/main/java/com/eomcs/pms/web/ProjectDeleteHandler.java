@@ -20,8 +20,6 @@ public class ProjectDeleteHandler extends HttpServlet {
 
     ProjectService projectService = (ProjectService) request.getServletContext().getAttribute("projectService");
 
-
-
     try {
       int no = Integer.parseInt(request.getParameter("no"));
 

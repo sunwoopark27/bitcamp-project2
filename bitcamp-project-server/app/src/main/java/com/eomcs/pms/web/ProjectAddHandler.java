@@ -27,15 +27,15 @@ public class ProjectAddHandler extends HttpServlet {
 
     try {
       Project p = new Project();
-      // 프로젝트 등록 1단계에서 입력한 내용이 세션에 보관되어 있다.
-      p.setTitle((String)session.getAttribute("title"));
+      // 프로젝트 등록 1단계에서 입력한 내용이 세션에 보관되어 있다. 
+      p.setTitle((String) session.getAttribute("title"));
 
-      // 프로젝트 등록 1단계에서 입력한 내용이 세션에 보관되어 있다.
-      p.setContent((String)session.getAttribute("content"));
-      p.setStartDate(Date.valueOf((String)session.getAttribute("startDate")));
-      p.setEndDate(Date.valueOf((String)session.getAttribute("endDate")));
+      // 프로젝트 등록 2단계에서 입력한 내용이 세션에 보관되어 있다.
+      p.setContent((String) session.getAttribute("content"));
+      p.setStartDate(Date.valueOf((String) session.getAttribute("startDate")));
+      p.setEndDate(Date.valueOf((String) session.getAttribute("endDate")));
 
-      // 사용자 로그인 정보는 세션에 보관되어있다.
+      // 사용자 로그인 정보는 세션에 보관되어 있다.
       Member loginUser = (Member) session.getAttribute("loginUser");
       p.setOwner(loginUser);
 
