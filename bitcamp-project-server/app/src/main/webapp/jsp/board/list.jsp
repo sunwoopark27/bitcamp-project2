@@ -19,9 +19,10 @@
 </tr>
 </thead>
 <tbody>
+
 <c:forEach items="${list}" var="b">
 <tr> 
-  <td>${b.no}></td> 
+  <td>${b.no}</td> 
   <td><a href='detail?no=${b.no}'>${b.title}</a></td>
   <td>${b.writer.name}</td>
   <td>${b.registeredDate}</td>
@@ -36,5 +37,6 @@
 <input type='search' name='keyword' value='${param.keyword}'> 
 <button>검색</button>
 </form>
+
 </body>
 </html>

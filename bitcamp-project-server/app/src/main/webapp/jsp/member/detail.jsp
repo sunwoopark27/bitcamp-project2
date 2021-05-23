@@ -10,6 +10,7 @@
 </head>
 <body>
 <h1>회원 정보(JSP + JSP 액션태그 + EL + JSTL)</h1>
+
 <c:if test="${not empty member}">
   <c:if test="${not empty member.photo}">
     <c:set var="photo80x80Url">../upload/${member.photo}_80x80.jpg</c:set>
@@ -55,9 +56,11 @@
 	</table>
 	</form>
 </c:if>
+
 <c:if test="${empty member}">
   <p>해당 번호의 회원이 없습니다.</p>
 </c:if>
+
 <p><a href='list'>목록</a></p>
 </body>
 </html>

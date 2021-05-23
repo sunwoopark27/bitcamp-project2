@@ -1,4 +1,3 @@
-<%@page import="com.eomcs.pms.domain.Project"%>
 <%@ page language="java" 
   contentType="text/html; charset=UTF-8"
   pageEncoding="UTF-8"%>
@@ -8,8 +7,7 @@
 <title>프로젝트 상세</title>
 </head>
 <body>
-<h1>프로젝트 상세보기(JSP + JSP 액션태그 + 선언 엘리먼트)</h1>
-<jsp:useBean id="project" type="com.eomcs.pms.domain.Project" scope="request"/>
+<h1>프로젝트 상세보기(JSP + JSP 액션태그 + 선언 엘리먼트 + EL)</h1>
 <form action='update' method='post'>
 번호: <input type='text' name='no' value='${project.no}' readonly><br>
 제목: <input type='text' name='title' value='${project.title}'><br>

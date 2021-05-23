@@ -13,7 +13,7 @@ public class Board {
   private int like;
 
   // 날짜 값을 특정 포맷의 문자열로 만들어 리턴한다.
-  public String getRegisteredDate2() { //readonlyproperty
+  public String getRegisteredDate2() {
     return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(registeredDate);
   }
 

@@ -1,6 +1,3 @@
-<%@page import="com.eomcs.pms.domain.Member"%>
-<%@page import="com.eomcs.pms.domain.Project"%>
-<%@page import="java.util.List"%>
 <%@ page language="java" 
   contentType="text/html; charset=UTF-8"
   pageEncoding="UTF-8"
@@ -21,6 +18,7 @@
 </tr>
 </thead>
 <tbody>
+
 <c:forEach items="${projects}" var="p">
 <tr> 
   <td>${p.no}</td> 
@@ -30,15 +28,16 @@
   <td>${p.memberNames}</td> 
 </tr>
 </c:forEach>
+
 </tbody>
 </table>
 
 <form method='get'>
 <select name='item'>
-  <option value='0' ${param.item == "0" ? selected : ""} >전체</option>
-  <option value='1' ${param.item == "1" ? selected : ""}>프로젝트명</option>
-  <option value='2' ${param.item == "2" ? selected : ""}>관리자</option>
-  <option value='3' ${param.item == "3" ? selected : ""}>팀원</option>
+  <option value='0' ${param.item == "0" ? "selected" : ""}>전체</option>
+  <option value='1' ${param.item == "1" ? "selected" : ""}>프로젝트명</option>
+  <option value='2' ${param.item == "2" ? "selected" : ""}>관리자</option>
+  <option value='3' ${param.item == "3" ? "selected" : ""}>팀원</option>
 </select>
 <input type='search' name='keyword' value='${param.keyword}'> 
 <button>검색</button>
