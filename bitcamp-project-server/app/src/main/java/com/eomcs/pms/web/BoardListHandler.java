@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.eomcs.pms.domain.Board;
 import com.eomcs.pms.service.BoardService;
 
-
 @SuppressWarnings("serial")
 @WebServlet("/board/list")
 public class BoardListHandler extends HttpServlet {
@@ -33,10 +32,8 @@ public class BoardListHandler extends HttpServlet {
 
       // JSP가 사용할 수 있도록 ServletRequest 보관소에 저장한다.
       request.setAttribute("list", boards);
+      request.setAttribute("viewUrl", "/jsp/board/list.jsp");
 
-      // 목록 출력을 JSP에게 맡긴다.
-      response.setContentType("text/html;charset=UTF-8");
-      request.getRequestDispatcher("/jsp/board/list.jsp").include(request, response);
 
     } catch (Exception e) {
       throw new ServletException(e);

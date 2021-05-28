@@ -29,9 +29,7 @@ public class BoardDetailHandler extends HttpServlet {
     try {
       Board board = boardService.get(no);
       request.setAttribute("board", board);
-
-      response.setContentType("text/html;charset=UTF-8");
-      request.getRequestDispatcher("/jsp/board/detail.jsp").include(request, response);
+      request.setAttribute("viewUrl", "/jsp/board/detail.jsp");
 
     } catch (Exception e) {
       throw new ServletException(e);
