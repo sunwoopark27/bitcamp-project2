@@ -2,28 +2,25 @@ package com.eomcs.pms.service.impl;
 
 import java.util.HashMap;
 import java.util.List;
-import com.eomcs.mybatis.TransactionCallback;
-import com.eomcs.mybatis.TransactionManager;
-import com.eomcs.mybatis.TransactionTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 import com.eomcs.pms.dao.ProjectDao;
 import com.eomcs.pms.dao.TaskDao;
 import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.domain.Project;
 import com.eomcs.pms.service.ProjectService;
 
-// 서비스 객체
-// - 비즈니스 로직을 담고 있다.
-// - 업무에 따라 트랜잭션을 제어하는 일을 한다.
-// - 서비스 객체의 메서드는 가능한 업무 관련 용어를 사용하여 메서드를 정의한다.
-//
+@Service
 public class DefaultProjectService implements ProjectService {
-
   TransactionTemplate transactionTemplate;
 
   ProjectDao projectDao;
   TaskDao taskDao;
 
-  public DefaultProjectService(TransactionManager txManager, ProjectDao projectDao, TaskDao taskDao) {
+  public DefaultProjectService(PlatformTransactionManager txManager, ProjectDao projectDao, TaskDao taskDao) {
     this.transactionTemplate = new TransactionTemplate(txManager);
     this.projectDao = projectDao;
     this.taskDao = taskDao;
@@ -34,7 +31,7 @@ public class DefaultProjectService implements ProjectService {
   public int add(Project project) throws Exception {
     return (int) transactionTemplate.execute(new TransactionCallback() {
       @Override
-      public Object doInTransaction() throws Exception {
+      public int doInTransaction(TransactionStatus status) throws Exception {
         // 트랜잭션으로 묶어서 실행할 작업을 기술한다.
         // 1) 프로젝트 정보를 입력한다.
         int count = projectDao.insert(project); 

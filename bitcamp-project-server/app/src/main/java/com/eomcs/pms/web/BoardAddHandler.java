@@ -1,33 +1,30 @@
 package com.eomcs.pms.web;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 import com.eomcs.pms.domain.Board;
 import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.service.BoardService;
 
-@SuppressWarnings("serial")
-@WebServlet("/board/add")
-public class BoardAddHandler extends HttpServlet {
+@Controller
+public class BoardAddHandler {
 
-  @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
-    request.setAttribute("viewUrl", "/jsp/board/form.jsp");
+  BoardService boardService;
+
+  public BoardAddHandler(BoardService boardService) {
+    this.boardService = boardService;
   }
 
-  @Override
-  protected void doPost(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
+  @RequestMapping("/board/add")
+  public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    if (request.getMethod().equals("GET")) {
 
-    BoardService boardService = (BoardService) request.getServletContext().getAttribute("boardService");
+      return "/jsp/board/form.jsp";
+    }
 
     Board b = new Board();
-
     b.setTitle(request.getParameter("title"));
     b.setContent(request.getParameter("content"));
 
@@ -36,12 +33,9 @@ public class BoardAddHandler extends HttpServlet {
     Member loginUser = (Member) httpRequest.getSession().getAttribute("loginUser");
     b.setWriter(loginUser);
 
-    try {
-      boardService.add(b);
-      request.setAttribute("redirect", "list");
-    } catch (Exception e) {
-      throw new ServletException(e);
-    }
+    boardService.add(b);
+    return "redirect:list";
+
   }
 }
 
