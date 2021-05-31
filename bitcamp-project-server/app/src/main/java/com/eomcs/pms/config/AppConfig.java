@@ -20,13 +20,13 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 // 빈 컨테이너를 사용한다.
 // 빈 컨테이너는 개발자가 지정한 설정에 맞춰 객체를 생성한다.
 // 다음 클래스를 빈 컨테이너의 행동을 제어하는 클래스이다.
-//
+// 
 // 제어하는 방법
 // - 클래스 선언에 애노테이션을 붙여서 제어한다.
 // - 클래스에 필드나 메서드를 추가하여 제어한다.
-//
+// 
 
-// 1) 빈 컨테이너가 자동으로 객체를 생성해야하는 패키지를 등록한다.
+// 1) 빈 컨테이너가 자동으로 객체를 생성해야 하는 패키지를 등록한다.
 @ComponentScan("com.eomcs.pms")
 
 // 2) Spring WebMVC 관련 객체를 찾아서 등록하는 기능을 활성화시킨다.
@@ -44,10 +44,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 public class AppConfig {
 
   // 수동으로 생성할 객체가 있다면, 다음과 같이 그 객체를 만들어 리턴하는 메서드를 정의하라!
-  // 단 메서드 선언에 @Bean을 붙여서 빈 컨테이너에게 이 메서드를 호출하라고 요구해야한다.
-  // 그리고 이 메서드의 리턴 값을 컨테이너에 보관해 두라고 요구해야한다.
-  //
-
+  // 단 메서드 선언에 @Bean을 붙여서 빈 컨테이너에게 이 메서드를 호출하라고 요구해야 한다.
+  // 그리고 이 메서드의 리턴 값을 컨테이너에 보관해 두라고 요구해야 한다.
 
   // 5) DB 커넥션풀 객체 생성
   // => DB 커넥션을 생성한 후 내부 버퍼에 보관해 둔다.
@@ -60,6 +58,7 @@ public class AppConfig {
       @Value("${jdbc.username}") String jdbcUsername,
       @Value("${jdbc.password}") String jdbcPassword) {
 
+
     DriverManagerDataSource ds = new DriverManagerDataSource();
     ds.setDriverClassName(jdbcDriver);
     ds.setUrl(jdbcUrl);
@@ -70,9 +69,8 @@ public class AppConfig {
 
   // 6) 트랜잭션 관리자 생성
   // => commit/rollback 을 다룬다.
-  @Bean
-  public PlatformTransactionManager transactionManager(
-      DataSource dataSource) {
+  @Bean 
+  public PlatformTransactionManager transactionManager(DataSource dataSource) {
     return new DataSourceTransactionManager(dataSource);
   }
 
@@ -100,6 +98,8 @@ public class AppConfig {
   }
 
 }
+
+
 
 
 
