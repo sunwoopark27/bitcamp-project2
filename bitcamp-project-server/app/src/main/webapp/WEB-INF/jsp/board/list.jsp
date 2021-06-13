@@ -11,7 +11,7 @@
 </head>
 <body>
 <h1>게시글 목록(JSP + JSP 액션태그 + EL + JSTL)</h1>
-<p><a href='add'>새 글</a></p>
+<p><a href='form'>새 글</a></p>
 <table border='1'>
 <thead>
 <tr>
@@ -37,6 +37,23 @@
 <input type='search' name='keyword' value='${param.keyword}'> 
 <button>검색</button>
 </form>
+
+<p>
+<c:if test="${pageNo > 1}">
+  <a href="list?pageNo=${pageNo-1}&pageSize=${pageSize}&keyword=${param.keyword}">[이전]</a>
+</c:if>
+<c:if test="${pageNo <= 1}">
+  [이전]
+</c:if>
+  ${pageNo}
+<c:if test="${pageNo < totalPage}">
+  <a href="list?pageNo=${pageNo+1}&pageSize=${pageSize}&keyword=${param.keyword}">[다음]</a>
+</c:if>
+<c:if test="${pageNo >= totalPage}">
+  [다음]
+</c:if>
+</p>
+
 
 </body>
 </html>

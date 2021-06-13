@@ -1,10 +1,12 @@
 package com.eomcs.pms.web;
 
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.eomcs.pms.domain.Board;
 import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.service.BoardService;
@@ -19,37 +21,28 @@ public class BoardController {
     this.boardService = boardService;
   }
 
-  @RequestMapping("add")
-  public String add(HttpServletRequest request, HttpServletResponse response) throws Exception {
+  @RequestMapping(path="form", method = RequestMethod.GET)
+  public void form() throws Exception {
+  }
 
-    if (request.getMethod().equals("GET")) {
-      return "/jsp/board/form.jsp";
-    }
-
-    Board b = new Board();
-    b.setTitle(request.getParameter("title"));
-    b.setContent(request.getParameter("content"));
-
-    // 작성자는 로그인 사용자이다.
-    HttpServletRequest httpRequest = request;
-    Member loginUser = (Member) httpRequest.getSession().getAttribute("loginUser");
+  @RequestMapping(path="add", method = RequestMethod.POST)
+  public String add(Board b, HttpSession session) throws Exception {
+    Member loginUser = (Member) session.getAttribute("loginUser");
     b.setWriter(loginUser);
 
     boardService.add(b);
     return "redirect:list";
   }
 
-  @RequestMapping("delete")
-  public String delete(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-    int no = Integer.parseInt(request.getParameter("no"));
+  @RequestMapping(path="delete", method=RequestMethod.GET)
+  public String delete(int no, HttpSession session) throws Exception {
 
     Board oldBoard = boardService.get(no);
     if (oldBoard == null) {
       throw new Exception("해당 번호의 게시글이 없습니다.");
     }
 
-    Member loginUser = (Member) request.getSession().getAttribute("loginUser");
+    Member loginUser = (Member) session.getAttribute("loginUser");
     if (oldBoard.getWriter().getNo() != loginUser.getNo()) {
       throw new Exception("삭제 권한이 없습니다!");
     }
@@ -59,47 +52,55 @@ public class BoardController {
     return "redirect:list";
   }
 
-  @RequestMapping("detail")
-  public String detail(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    int no = Integer.parseInt(request.getParameter("no"));
-    Board board = boardService.get(no);
-    request.setAttribute("board", board);
-    return "/jsp/board/detail.jsp";
+  @RequestMapping(path="detail", method=RequestMethod.GET)
+  public void detail(int no, Model model) throws Exception {
+    model.addAttribute("board", boardService.get(no));
   }
 
-  @RequestMapping("list")
-  public String list(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    String keyword = request.getParameter("keyword");
-    List<Board> boards = null;
-    if (keyword != null && keyword.length() > 0) {
-      boards = boardService.search(keyword);
-    } else {
-      boards = boardService.list();
+  @RequestMapping(value="list", method=RequestMethod.GET)
+  public void list(
+      String keyword, 
+      @RequestParam(defaultValue = "1") int pageNo, 
+      @RequestParam(defaultValue = "3") int pageSize, 
+      Model model) throws Exception {
+
+    int count = boardService.count(keyword);
+
+    if (pageSize < 3 || pageSize > 10) {
+      pageSize = 3;
     }
 
-    request.setAttribute("list", boards);
+    int totalPage = count / pageSize + ((count % pageSize) > 0 ? 1 : 0);
 
-    return "/jsp/board/list.jsp";
+    if (pageNo < 1 || pageNo > totalPage) {
+      pageNo = 1;
+    }
+
+
+    List<Board> boards = null;
+    if (keyword != null && keyword.length() > 0) {
+      boards = boardService.search(keyword, pageNo, pageSize);
+    } else {
+      boards = boardService.list(pageNo, pageSize);
+    }
+
+    model.addAttribute("list", boards);
+    model.addAttribute("totalPage", totalPage);
+    model.addAttribute("pageNo", pageNo);
+    model.addAttribute("pageSize", pageSize);
   }
 
-  @RequestMapping("update")
-  public String update(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    int no = Integer.parseInt(request.getParameter("no"));
-
-    Board oldBoard = boardService.get(no);
+  @RequestMapping(value="update", method=RequestMethod.POST)
+  public String update(Board board, HttpSession session) throws Exception {
+    Board oldBoard = boardService.get(board.getNo());
     if (oldBoard == null) {
       throw new Exception("해당 번호의 게시글이 없습니다.");
     } 
 
-    Member loginUser = (Member) request.getSession().getAttribute("loginUser");
+    Member loginUser = (Member) session.getAttribute("loginUser");
     if (oldBoard.getWriter().getNo() != loginUser.getNo()) {
       throw new Exception("변경 권한이 없습니다!");
     }
-
-    Board board = new Board();
-    board.setNo(oldBoard.getNo());
-    board.setTitle(request.getParameter("title"));
-    board.setContent(request.getParameter("content"));
     boardService.update(board);
 
     return "redirect:list";

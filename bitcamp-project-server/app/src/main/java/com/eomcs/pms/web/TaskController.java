@@ -1,12 +1,12 @@
 package com.eomcs.pms.web;
 
-import java.sql.Date;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import com.eomcs.pms.domain.Member;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.eomcs.pms.domain.Task;
 import com.eomcs.pms.service.MemberService;
 import com.eomcs.pms.service.ProjectService;
@@ -26,72 +26,39 @@ public class TaskController {
     this.memberService = memberService;
   }
 
-  @RequestMapping("add")
-  public String add(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    if (request.getMethod().equals("GET")) {
-      request.setAttribute("projects", projectService.list());
-      request.setAttribute("members", memberService.list(null));
-      return "/jsp/task/form.jsp";
-    }
+  @GetMapping("form")
+  public void form(Model model) throws Exception {
+    model.addAttribute("projects", projectService.list());
+    model.addAttribute("members", memberService.list(null));
+  }
 
-    Task t = new Task();
-    t.setProjectNo(Integer.parseInt(request.getParameter("projectNo")));
-    t.setContent(request.getParameter("content"));
-    t.setDeadline(Date.valueOf(request.getParameter("deadline")));
-    t.setStatus(Integer.parseInt(request.getParameter("status")));
-
-    Member owner = new Member();
-    owner.setNo(Integer.parseInt(request.getParameter("owner")));
-    t.setOwner(owner);
-
-    taskService.add(t);
-
+  @PostMapping("add")
+  public String add(Task task) throws Exception {
+    taskService.add(task);
     return "redirect:list";
   }
 
   @RequestMapping("delete")
-  public String delete(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-    int no = Integer.parseInt(request.getParameter("no"));
-
-    Task task = taskService.get(no);
-    if (task == null) {
+  public String delete(int no) throws Exception {
+    if (taskService.delete(no) == 0) {
       throw new Exception("해당 번호의 작업이 없습니다.");
     }
-
-    taskService.delete(no);
-
     return "redirect:list";
   }
 
-  @RequestMapping("detail")
-  public String detail(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-    int no = Integer.parseInt(request.getParameter("no"));
-
+  @GetMapping("detail")
+  public void detail(int no, Model model) throws Exception {
     Task task = taskService.get(no);
     if (task == null) {
       throw new Exception("해당 번호의 작업이 없습니다.");
     }
 
-    request.setAttribute("task", task);
-    request.setAttribute("members", memberService.list(null));
-    return "/jsp/task/detail.jsp";
+    model.addAttribute("task", task);
+    model.addAttribute("members", memberService.list(null));
   }
 
-  @RequestMapping("list")
-  public String list(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-    String input  = request.getParameter("projectNo");
-
-    int projectNo = 0;
-    if (input != null) {
-      try {
-        projectNo = Integer.parseInt(input);
-      } catch (Exception e) {
-        throw new Exception("유효한 프로젝트 번호를 입력하세요.");
-      }
-    }
+  @GetMapping("list")
+  public void list(@RequestParam(defaultValue = "0") int projectNo, Model model) throws Exception {
 
     List<Task> tasks = null;
     if (projectNo == 0) {
@@ -100,36 +67,16 @@ public class TaskController {
       tasks = taskService.listOfProject(projectNo);
     }
 
-    request.setAttribute("projectNo", projectNo);
-    request.setAttribute("projects", projectService.list());
-    request.setAttribute("tasks", tasks);
-    return "/jsp/task/list.jsp";
+    model.addAttribute("projectNo", projectNo);
+    model.addAttribute("projects", projectService.list());
+    model.addAttribute("tasks", tasks);
   }
 
-  @RequestMapping("update")
-  public String update(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-    int no = Integer.parseInt(request.getParameter("no"));
-
-    Task oldTask = taskService.get(no);
-    if (oldTask == null) {
+  @PostMapping("update")
+  public String update(Task task) throws Exception {
+    if (taskService.update(task) == 0) {
       throw new Exception("해당 번호의 회원이 없습니다.");
     } 
-
-    Task task = new Task();
-    task.setNo(no);
-    task.setProjectNo(Integer.parseInt(request.getParameter("projectNo")));
-    task.setContent(request.getParameter("content"));
-    task.setDeadline(Date.valueOf(request.getParameter("deadline")));
-    //신규(0), 진행중(1), 완료(2)
-    task.setStatus(Integer.parseInt(request.getParameter("status")));
-
-    Member owner = new Member();
-    owner.setNo(Integer.parseInt(request.getParameter("owner")));
-    task.setOwner(owner);
-
-    taskService.update(task);
-
     return "redirect:list";
   }
 }

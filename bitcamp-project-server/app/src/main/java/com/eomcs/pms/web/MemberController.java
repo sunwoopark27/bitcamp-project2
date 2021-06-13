@@ -2,10 +2,12 @@ package com.eomcs.pms.web;
 
 import java.util.List;
 import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletContext;
 import javax.servlet.http.Part;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.service.MemberService;
@@ -18,32 +20,26 @@ import net.coobird.thumbnailator.name.Rename;
 @RequestMapping("/member/")
 public class MemberController {
 
+  ServletContext sc;
   MemberService memberService;
 
-  public MemberController(MemberService memberService) {
+  public MemberController(MemberService memberService, ServletContext sc) {
     this.memberService = memberService;
+    this.sc = sc;
   }
 
-  @RequestMapping("add")
-  public String add(HttpServletRequest request, HttpServletResponse response) throws Exception {
+  @GetMapping("form")
+  public void form() throws Exception {
+  }
 
-    String uploadDir = request.getServletContext().getRealPath("/upload");
+  @PostMapping("add")
+  public String add(Member m, Part photoFile) throws Exception {
+    String uploadDir = sc.getRealPath("/upload");
 
-    if (request.getMethod().equals("GET")) {
-      return "/jsp/member/form.jsp";
-    }
-
-    Member m = new Member();
-    m.setName(request.getParameter("name"));
-    m.setEmail(request.getParameter("email"));
-    m.setPassword(request.getParameter("password"));
-    m.setTel(request.getParameter("tel"));
-
-    Part photoPart = request.getPart("photo");
-    if (photoPart.getSize() > 0) {
-      // 파일을 선택해서 업로드 했다면,
+    if (photoFile.getSize() > 0) {
+      // 파일을 선택해서 업로드 했다면, 
       String filename = UUID.randomUUID().toString();
-      photoPart.write(uploadDir + "/" + filename);
+      photoFile.write(uploadDir + "/" + filename);
       m.setPhoto(filename);
 
       // 썸네일 이미지 생성
@@ -74,11 +70,8 @@ public class MemberController {
     return "redirect:list";
   }
 
-  @RequestMapping("delete")
-  public String delete(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-    int no = Integer.parseInt(request.getParameter("no"));
-
+  @GetMapping("delete")
+  public String delete(int no) throws Exception {
     Member member = memberService.get(no);
     if (member == null) {
       throw new Exception("해당 번호의 회원이 없습니다.");
@@ -94,32 +87,21 @@ public class MemberController {
     return "redirect:list";
   }
 
-  @RequestMapping("detail")
-  public String detail(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    int no = Integer.parseInt(request.getParameter("no"));
-
+  @GetMapping("detail")
+  public void detail(int no, Model model) throws Exception {
     Member m = memberService.get(no);
-    request.setAttribute("member", m);
-    return "/jsp/member/detail.jsp";
+    model.addAttribute("member", m);
   }
 
-  @RequestMapping("list") 
-  public String list(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    List<Member> list = memberService.list(request.getParameter("keyword"));
-    request.setAttribute("list", list);
-    return "/jsp/member/list.jsp";
+  @GetMapping("list") 
+  public void list(String keyword, Model model) throws Exception {
+    List<Member> list = memberService.list(keyword);
+    model.addAttribute("list", list);
   }
 
-  @RequestMapping("update")
-  public String update(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-    String uploadDir = request.getServletContext().getRealPath("/upload");
-    int no = Integer.parseInt(request.getParameter("no"));
-
-    Member oldMember = memberService.get(no);
-    if (oldMember == null) {
-      throw new Exception("해당 번호의 회원이 없습니다.");
-    } 
+  @PostMapping("update")
+  public String update(Member member, Part photoFile) throws Exception {
+    String uploadDir = sc.getRealPath("/upload");
 
     // 회원 관리를 관리자가 할 경우 모든 회원의 정보 변경 가능
     //      Member loginUser = (Member) request.getSession().getAttribute("loginUser");
@@ -127,18 +109,10 @@ public class MemberController {
     //        throw new Exception("변경 권한이 없습니다!");
     //      }
 
-    Member member = new Member();
-    member.setNo(oldMember.getNo());
-    member.setName(request.getParameter("name"));
-    member.setEmail(request.getParameter("email"));
-    member.setPassword(request.getParameter("password"));
-    member.setTel(request.getParameter("tel"));
-
-    Part photoPart = request.getPart("photo");
-    if (photoPart.getSize() > 0) {
+    if (photoFile.getSize() > 0) {
       // 파일을 선택해서 업로드 했다면,
       String filename = UUID.randomUUID().toString();
-      photoPart.write(uploadDir + "/" + filename);
+      photoFile.write(uploadDir + "/" + filename);
       member.setPhoto(filename);
 
       // 썸네일 이미지 생성
@@ -165,7 +139,10 @@ public class MemberController {
       });
     }
 
-    memberService.update(member);
+    if (memberService.update(member) == 0) {
+      throw new Exception("해당 번호의 회원이 없습니다.");
+    } 
+
     return "redirect:list";
   }
 }
