@@ -2,30 +2,27 @@ package com.eomcs.pms.service.impl;
 
 import java.util.HashMap;
 import java.util.List;
-import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 import com.eomcs.pms.dao.ProjectDao;
 import com.eomcs.pms.dao.TaskDao;
 import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.domain.Project;
 import com.eomcs.pms.service.ProjectService;
 
-// 서비스 객체
-// - 비즈니스 로직을 담고 있다.
-// - 업무에 따라 트랜잭션을 제어하는 일을 한다.
-// - 서비스 객체의 메서드는 가능한 업무 관련 용어를 사용하여 메서드를 정의한다.
-//
+@Service
 public class DefaultProjectService implements ProjectService {
 
-  // 서비스 객체는 트랜잭션을 제어해야 하기 때문에
-  // DAO가 사용하는 SqlSession 객체를 주입 받아야 한다.
-  SqlSession sqlSession; 
+  TransactionTemplate transactionTemplate;
 
-  // 비즈니스 로직을 수행하는 동안 데이터 처리를 위해 사용할 DAO 를 주입 받아야 한다.
   ProjectDao projectDao;
   TaskDao taskDao;
 
-  public DefaultProjectService(SqlSession sqlSession, ProjectDao projectDao, TaskDao taskDao) {
-    this.sqlSession = sqlSession;
+  public DefaultProjectService(PlatformTransactionManager  txManager, ProjectDao projectDao, TaskDao taskDao) {
+    this.transactionTemplate = new TransactionTemplate(txManager);
     this.projectDao = projectDao;
     this.taskDao = taskDao;
   }
@@ -33,24 +30,29 @@ public class DefaultProjectService implements ProjectService {
   // 등록 업무 
   @Override
   public int add(Project project) throws Exception {
-    try {
-      // 1) 프로젝트 정보를 입력한다.
-      int count = projectDao.insert(project);
+    return transactionTemplate.execute(new TransactionCallback<Integer>(){
+      @Override
+      public Integer doInTransaction(TransactionStatus status) {
+        try {
+          // 트랜잭션으로 묶어서 실행할 작업을 기술한다.
+          // 1) 프로젝트 정보를 입력한다.
+          int count = projectDao.insert(project); 
 
-      // 2) 멤버를 입력한다.
-      HashMap<String,Object> params = new HashMap<>();
-      params.put("projectNo", project.getNo());
-      params.put("members", project.getMembers());
+          if (project.getMembers().size() > 0) {
+            // 2) 멤버를 입력한다.
+            HashMap<String,Object> params = new HashMap<>();
+            params.put("projectNo", project.getNo());
+            params.put("members", project.getMembers());
 
-      projectDao.insertMembers(params);
+            projectDao.insertMembers(params);
+          }
 
-      sqlSession.commit();
-      return count;
-
-    } catch (Exception e) {
-      sqlSession.rollback();
-      throw e;
-    }
+          return count;
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
   }
 
   // 조회 업무
@@ -65,47 +67,66 @@ public class DefaultProjectService implements ProjectService {
     return projectDao.findByNo(no);
   }
 
+  @Override
+  public List<Member> getMembers(int projectNo) throws Exception {
+    return projectDao.findMembers(projectNo);
+  }
+
   // 변경 업무
   @Override
   public int update(Project project) throws Exception {
-    try {
-      int count = projectDao.update(project);
-      projectDao.deleteMembers(project.getNo());
+    return transactionTemplate.execute(new TransactionCallback<Integer>() {
+      @Override
+      public Integer doInTransaction(TransactionStatus status) {
+        try {
+          int count = projectDao.update(project);
+          projectDao.deleteMembers(project.getNo());
 
-      HashMap<String,Object> params = new HashMap<>();
-      params.put("projectNo", project.getNo());
-      params.put("members", project.getMembers());
+          if (project.getMembers().size() > 0) {
+            HashMap<String,Object> params = new HashMap<>();
+            params.put("projectNo", project.getNo());
+            params.put("members", project.getMembers());
 
-      projectDao.insertMembers(params);
+            projectDao.insertMembers(params);
+          }
+          // 다른 스레드가 작업할 시간을 준다.
+          // => 즉 다른 스레드가 현재 스레드의 트랜잭션 작업을 간섭할 수 있는지 확인하기 위함이다.
+          //        Thread.sleep(30000);
 
-      sqlSession.commit();
-      return count;
-
-    } catch (Exception e) {
-      sqlSession.rollback();
-      throw e;
-    }
+          return count;
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
   }
 
   // 삭제 업무
   @Override
   public int delete(int no) throws Exception {
-    try {
-      // 1) 프로젝트의 모든 작업 삭제
-      taskDao.deleteByProjectNo(no);
+    return transactionTemplate.execute(new TransactionCallback<Integer>() {
+      @Override
+      public Integer doInTransaction(TransactionStatus status) {
+        try {
+          // 트랜잭션으로 묶어서 실행할 작업을 기술한다.
+          // 1) 프로젝트의 모든 작업 삭제
+          taskDao.deleteByProjectNo(no);
 
-      // 2) 프로젝트 멤버 삭제
-      projectDao.deleteMembers(no);
+          // 2) 프로젝트 멤버 삭제
+          projectDao.deleteMembers(no);
 
-      // 3) 프로젝트 삭제
-      int count = projectDao.delete(no);
-      sqlSession.commit();
-      return count;
+          //        if ("test".length() == 4) {
+          //          // 현재 스레드의 트랜잭션 rollback()이 다른 스레드의 트랜잭션에 영향을 끼치는지 확인한다.
+          //          throw new Exception("일부러 예외 발생!"); 
+          //        }
 
-    } catch (Exception e) {
-      sqlSession.rollback();
-      throw e;
-    }
+          // 3) 프로젝트 삭제
+          return  projectDao.delete(no);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
   }
 
   // 찾기
@@ -130,28 +151,27 @@ public class DefaultProjectService implements ProjectService {
 
   @Override
   public int deleteMembers(int projectNo) throws Exception {
-    int count = projectDao.deleteMembers(projectNo);
-    sqlSession.commit();
-    return count;
+    return projectDao.deleteMembers(projectNo);
   }
 
   @Override
   public int updateMembers(int projectNo, List<Member> members) throws Exception {
-    try {
-      projectDao.deleteMembers(projectNo);
+    return transactionTemplate.execute(new TransactionCallback<Integer>() {
+      @Override
+      public Integer doInTransaction(TransactionStatus status) {
+        try {
+          projectDao.deleteMembers(projectNo);
 
-      HashMap<String,Object> params = new HashMap<>();
-      params.put("projectNo", projectNo);
-      params.put("members", members);
+          HashMap<String,Object> params = new HashMap<>();
+          params.put("projectNo", projectNo);
+          params.put("members", members);
 
-      int count = projectDao.insertMembers(params);
-      sqlSession.commit();
-      return count;
-
-    } catch (Exception e) {
-      sqlSession.rollback();
-      throw e;
-    }
+          return projectDao.insertMembers(params);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
   }
 }
 
