@@ -3,12 +3,10 @@ package com.eomcs.pms.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.stereotype.Service;
 import com.eomcs.pms.dao.MemberDao;
 import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.service.MemberService;
 
-@Service
 public class DefaultMemberService implements MemberService {
 
   MemberDao memberDao;
@@ -25,8 +23,8 @@ public class DefaultMemberService implements MemberService {
 
   // 조회 업무
   @Override
-  public List<Member> list(String keyword) throws Exception {
-    return memberDao.findByKeyword(keyword);
+  public List<Member> list() throws Exception {
+    return memberDao.findAll();
   }
 
   // 상세 조회 업무
