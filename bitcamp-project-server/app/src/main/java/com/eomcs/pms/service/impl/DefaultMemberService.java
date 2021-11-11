@@ -1,24 +1,27 @@
 package com.eomcs.pms.service.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.apache.ibatis.session.SqlSession;
 import com.eomcs.pms.dao.MemberDao;
 import com.eomcs.pms.domain.Member;
 import com.eomcs.pms.service.MemberService;
 
 public class DefaultMemberService implements MemberService {
 
+  SqlSession sqlSession;
   MemberDao memberDao;
 
-  public DefaultMemberService(MemberDao memberDao) {
+  public DefaultMemberService(SqlSession sqlSession, MemberDao memberDao) {
+    this.sqlSession = sqlSession;
     this.memberDao = memberDao;
   }  
 
   // 등록 업무
   @Override
   public int add(Member member) throws Exception {
-    return memberDao.insert(member);
+    int count = memberDao.insert(member);
+    sqlSession.commit();
+    return count;
   }
 
   // 조회 업무
@@ -33,26 +36,20 @@ public class DefaultMemberService implements MemberService {
     return memberDao.findByNo(no);
   }
 
-  // 사용자 조회 업무
-  @Override
-  public Member get(String email, String password) throws Exception {
-    Map<String,Object> params = new HashMap<>();
-    params.put("email", email);
-    params.put("password", password);
-
-    return memberDao.findByEmailPassword(params);
-  }
-
   // 변경 업무
   @Override
   public int update(Member member) throws Exception {
-    return memberDao.update(member);
+    int count = memberDao.update(member);
+    sqlSession.commit();
+    return count;
   }
 
   // 삭제 업무
   @Override
   public int delete(int no) throws Exception {
-    return memberDao.delete(no);
+    int count = memberDao.delete(no);
+    sqlSession.commit();
+    return count;
   }
 
   // 이름으로 찾기

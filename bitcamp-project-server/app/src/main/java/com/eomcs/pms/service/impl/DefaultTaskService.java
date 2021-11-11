@@ -1,6 +1,7 @@
 package com.eomcs.pms.service.impl;
 
 import java.util.List;
+import org.apache.ibatis.session.SqlSession;
 import com.eomcs.pms.dao.TaskDao;
 import com.eomcs.pms.domain.Task;
 import com.eomcs.pms.service.TaskService;
@@ -12,17 +13,24 @@ import com.eomcs.pms.service.TaskService;
 //
 public class DefaultTaskService implements TaskService {
 
+  // 서비스 객체는 트랜잭션을 제어해야 하기 때문에
+  // DAO가 사용하는 SqlSession 객체를 주입 받아야 한다.
+  SqlSession sqlSession;
+
   // 비즈니스 로직을 수행하는 동안 데이터 처리를 위해 사용할 DAO 를 주입 받아야 한다.
   TaskDao taskDao; 
 
-  public DefaultTaskService(TaskDao taskDao) {
+  public DefaultTaskService(SqlSession sqlSession, TaskDao taskDao) {
+    this.sqlSession = sqlSession;
     this.taskDao = taskDao;
   }
 
   // 등록 업무
   @Override
   public int add(Task task) throws Exception {
-    return taskDao.insert(task);
+    int count = taskDao.insert(task);
+    sqlSession.commit();
+    return count;
   }
 
   // 조회 업무
@@ -45,13 +53,17 @@ public class DefaultTaskService implements TaskService {
   // 변경 업무
   @Override
   public int update(Task task) throws Exception {
-    return taskDao.update(task);
+    int count = taskDao.update(task);
+    sqlSession.commit();
+    return count;
   }
 
   // 삭제 업무
   @Override
   public int delete(int no) throws Exception {
-    return taskDao.delete(no);
+    int count = taskDao.delete(no);
+    sqlSession.commit();
+    return count;
   }
 
 }
