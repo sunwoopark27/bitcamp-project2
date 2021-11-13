@@ -14,14 +14,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import com.eomcs.mybatis.MybatisDaoFactory;
+import com.eomcs.mybatis.SqlSessionFactoryProxy;
+import com.eomcs.mybatis.TransactionManager;
 import com.eomcs.pms.dao.BoardDao;
 import com.eomcs.pms.dao.MemberDao;
 import com.eomcs.pms.dao.ProjectDao;
@@ -37,9 +39,12 @@ import com.eomcs.pms.service.impl.DefaultMemberService;
 import com.eomcs.pms.service.impl.DefaultProjectService;
 import com.eomcs.pms.service.impl.DefaultTaskService;
 import com.eomcs.stereotype.Component;
+import com.eomcs.util.CommandFilter;
 import com.eomcs.util.CommandRequest;
 import com.eomcs.util.CommandResponse;
+import com.eomcs.util.FilterList;
 import com.eomcs.util.Prompt;
+import com.eomcs.util.Session;
 
 public class ServerApp {
 
@@ -50,6 +55,9 @@ public class ServerApp {
 
   // 객체를 보관할 컨테이너 준비
   Map<String,Object> objMap = new HashMap<>();
+
+  // 세션을 보관할 저장소
+  Map<String,Session> sessionMap = new HashMap<>();
 
   public static void main(String[] args) {
 
@@ -80,25 +88,31 @@ public class ServerApp {
     // => SqlSessionFactory 객체 준비
     SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(mybatisConfigStream);
 
-    // => DAO가 사용할 SqlSession 객체 준비
-    //    - 수동 commit 으로 동작하는 SqlSession 객체를 준비한다.
-    SqlSession sqlSession = sqlSessionFactory.openSession(false);
+    // => 트랜잭션 상태에 따라 SqlSession 객체를 만들어주는 SqlSessionFactory 대행자를 준비한다.
+    SqlSessionFactoryProxy sqlSessionFactoryProxy = new SqlSessionFactoryProxy(sqlSessionFactory);
 
     // 2) DAO 구현체를 자동으로 만들어주는 공장 객체를 준비한다.
-    MybatisDaoFactory daoFactory = new MybatisDaoFactory(sqlSession);
+    // => 오리지널 SqlSessionFactory 대신에 트랜잭션 상태에 따라 SqlSession 객체를 만들어주는
+    //    SqlSessionFactory 대행자를 주입한다.
+    MybatisDaoFactory daoFactory = new MybatisDaoFactory(sqlSessionFactoryProxy);
 
     // 3) 서비스 객체가 사용할 DAO 객체 준비
+    // => DAO 객체는 SqlSession 객체가 필요할 때마다 SqlSessionFactory 대행자에게 요구할 것이다.
     BoardDao boardDao = daoFactory.createDao(BoardDao.class);
     MemberDao memberDao = daoFactory.createDao(MemberDao.class);
     ProjectDao projectDao = daoFactory.createDao(ProjectDao.class);
     TaskDao taskDao = daoFactory.createDao(TaskDao.class);
 
+    // => 서비스 객체가 사용할 트랜잭션 관리자를 준비한다.
+    TransactionManager txManager = new TransactionManager(sqlSessionFactoryProxy);
+
     // 4) Command 구현체가 사용할 의존 객체(서비스 객체 + 도우미 객체) 준비
     // => 서비스 객체 생성
-    BoardService boardService = new DefaultBoardService(sqlSession, boardDao);
-    MemberService memberService = new DefaultMemberService(sqlSession, memberDao);
-    ProjectService projectService = new DefaultProjectService(sqlSession, projectDao, taskDao);
-    TaskService taskService = new DefaultTaskService(sqlSession, taskDao);
+    // => 기존에 주입하던 SqlSessionFactory 대신 TransactionManager를 주입한다. 
+    BoardService boardService = new DefaultBoardService(boardDao);
+    MemberService memberService = new DefaultMemberService(memberDao);
+    ProjectService projectService = new DefaultProjectService(txManager, projectDao, taskDao);
+    TaskService taskService = new DefaultTaskService(taskDao);
 
     // => 도우미 객체 생성
     MemberValidator memberValidator = new MemberValidator(memberService);
@@ -174,65 +188,107 @@ public class ServerApp {
       // 클라이언트로부터 값을 입력 받을 때 사용할 객체를 준비한다.
       Prompt prompt = new Prompt(in, out);
 
+      // 클라이언트가 보낸 요청을 읽는다.
+      String requestLine = in.readLine();
+
+      // 클라이언트를 구분할 때 사용할 세션 아이디
+      String sessionId = null;
+
+      // 클라이언트가 사용할 저장소
+      Session session = null;
+
+      // 새션 객체를 새로 만들었는지 여부 
+      boolean isNewSession = false;
+
+      // 클라이언트가 보낸 요청 헤더를 읽는다.
       while (true) {
-        // 클라이언트가 보낸 요청을 읽는다.
-        String requestLine = in.readLine();
-
-        // 클라이언트가 보낸 나머지 데이터를 읽는다.
-        while (true) {
-          String line = in.readLine();
-          if (line.length() == 0) {
-            break;
-          }
-          // 지금은 '요청 명령' 과 '빈 줄' 사이에 존재하는 데이터는 무시한다.
+        String line = in.readLine();
+        if (line.length() == 0) {
+          break;
         }
+        // 만약 읽은 헤더가 sessionid 라면,
+        if (line.startsWith("SESSION_ID:")) {
+          sessionId = line.substring(11);
 
-        // 클라이언트 요청에 대해 기록(log)을 남긴다.
-        System.out.printf("[%s:%d] %s\n", 
-            remoteAddr.getHostString(), remoteAddr.getPort(), requestLine);
-
-
-        if (requestLine.equalsIgnoreCase("serverstop")) {
-          out.println("Server stopped!");
-          out.println();
-          out.flush();
-          terminate();
-          return; 
+          // 세션 아이디에 해당하는 세션 객체를 찾는다.
+          session = sessionMap.get(sessionId);
         }
+      }
 
-        if (requestLine.equalsIgnoreCase("exit") || requestLine.equalsIgnoreCase("quit")) {
-          out.println("Goodbye!");
-          out.println();
-          out.flush();
-          return;
-        }
+      // 클라이언트가 세션 아이디를 보내오지 않았거나,
+      // 보내오긴 했지만 무효한 세션 아이디일 경우
+      // 새로 세션 객체를 만든다.
+      if (session == null) {
+        session = new Session();
+        sessionId = UUID.randomUUID().toString();
+        isNewSession = true;
+        // 세션 객체를 새로 만들었으면, 
+        // 다음에 같은 클라이언트가 또 사용할 수 있도록 세션 보관소에 저장해 둔다.
+        sessionMap.put(sessionId, session);
+      }
 
-        // 클라이언트의 요청을 처리할 Command 구현체를 찾는다.
-        Command command = (Command) objMap.get(requestLine);
-        if (command == null) {
-          out.println("해당 명령을 처리할 수 없습니다!");
-          out.println();
-          out.flush();
-          continue;
-        }
+      // 클라이언트 요청에 대해 기록(log)을 남긴다.
+      System.out.printf("[%s:%d] %s\n", 
+          remoteAddr.getHostString(), remoteAddr.getPort(), requestLine);
 
-        CommandRequest request = new CommandRequest(
-            requestLine, 
-            remoteAddr.getHostString(),
-            remoteAddr.getPort(), 
-            prompt);
 
-        CommandResponse response = new CommandResponse(out);
-
-        // Command 구현체를 실행한다.
-        try {
-          command.service(request, response);
-        } catch (Exception e) {
-          out.println("서버 오류 발생!");
-          e.printStackTrace();
-        }
+      if (requestLine.equalsIgnoreCase("serverstop")) {
+        out.println("Server stopped!");
         out.println();
         out.flush();
+        terminate();
+        return; 
+      }
+
+      // 클라이언트의 요청을 처리할 Command 구현체를 찾는다.
+      Command command = (Command) objMap.get(requestLine);
+      if (command == null) {
+        out.println("해당 명령을 처리할 수 없습니다!");
+        out.println();
+        out.flush();
+        return;
+      }
+
+      CommandRequest request = new CommandRequest(
+          requestLine, 
+          remoteAddr.getHostString(),
+          remoteAddr.getPort(), 
+          prompt,
+          session);
+
+      CommandResponse response = new CommandResponse(out);
+
+      // 필터 목록을 관리할 객체를 준비한다.
+      FilterList filterList = new FilterList();
+
+      // Command 구현체를 실행할 필터를 준비한다.
+      CommandFilter commandFilter = new CommandFilter(command);
+
+      // 필터를 FilterList에 보관한다.
+      filterList.add(commandFilter);
+
+      // 클라이언트가 요청한 작업을 처리한 후 응답 데이터를 보내기 전에 
+      // 먼저 클라이언트에게 응답 헤더를 보낸다.
+      out.println("OK");
+      if (isNewSession) {
+        out.printf("SESSION_ID:%s\n", sessionId);
+      }
+      out.println();
+
+      // Command 구현체를 실행한다.
+      try {
+        // 직접 Command 구현체를 호출하는 대신에 필터 체인을 통해 실행한다.
+        // => 필터 목록에서 맨 앞의 필터 체인을 꺼내서 실행한다.
+        filterList.getHeaderChain().doFilter(request, response);
+
+        out.println();
+        out.flush();
+
+      } catch (Exception e) {
+        out.println("서버 오류 발생!");
+        out.println();
+        out.flush();
+        throw e;
       }
 
     } catch (Exception e) {
